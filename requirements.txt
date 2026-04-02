@@ -1,0 +1,2 @@
+pycryptodome>=3.18.0
+customtkinter>=5.2.0
