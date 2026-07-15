@@ -153,6 +153,35 @@ This tool is for **personal data recovery only** — to help you access your own
 
 ---
 
+## FAQ
+
+**Is this safe? Do my files get uploaded anywhere?**
+No. Everything runs locally on your machine (or entirely in-browser via the
+hosted version). Your photos and videos never leave your device.
+
+**Does this work on Redmi and POCO phones, not just Xiaomi?**
+Yes. Redmi and POCO both run MIUI/HyperOS with the same Gallery app and the
+same encryption scheme, so this tool works identically on all three brands.
+
+**Do I need my phone connected while decrypting?**
+No. Copy the `.lsa`/`.lsav` files to your computer first — the phone isn't
+needed during decryption itself.
+
+**Is this free?**
+Yes, fully free and open source (MIT license). No per-file or per-MB charges.
+
+**What MIUI/HyperOS versions does this support?**
+Any version where MIUI Gallery uses AES-128-CTR with the key derived from
+the Gallery APK's signing certificate — this has been consistent from
+MIUI 12 through HyperOS 2.
+
+**My file won't decrypt / looks corrupted. What do I do?**
+Open an issue with the file's size and your MIUI Gallery version — most
+failures are due to a Gallery APK signing-key mismatch across regional
+builds (Global vs. China vs. EU).
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
