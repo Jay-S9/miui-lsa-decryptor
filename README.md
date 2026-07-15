@@ -4,6 +4,8 @@
 
 MIUI Gallery's "Secret Album" feature encrypts every photo and video you move into it, saving them as `.lsa` (photos) and `.lsav` (videos) files. This tool reverses that encryption and gives you back your original JPEGs, PNGs, and MP4s — no account needed, no internet, no cloud.
 
+- **Wide device coverage** — works on Xiaomi, Redmi, and POCO devices running MIUI 12 through HyperOS 2, since all three brands share the same MIUI Gallery Secret Album encryption scheme
+  
 ---
 
 ## Features
