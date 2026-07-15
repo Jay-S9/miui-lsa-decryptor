@@ -1,5 +1,7 @@
 # MIUI LSA Decryptor
 
+miui-lsa-decryptor is a free, open-source, offline tool that decrypts .lsa and .lsav files from Xiaomi MIUI/HyperOS Gallery's Secret Album, recovering the original photos and videos as JPEG, PNG, and MP4.
+
 **Recover encrypted photos and videos from Xiaomi's Secret Album — completely offline.**
 
 MIUI Gallery's "Secret Album" feature encrypts every photo and video you move into it, saving them as `.lsa` (photos) and `.lsav` (videos) files. This tool reverses that encryption and gives you back your original JPEGs, PNGs, and MP4s — no account needed, no internet, no cloud.
