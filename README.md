@@ -27,8 +27,6 @@ MIUI Gallery's "Secret Album" feature encrypts every photo and video you move in
 |---------|-------------|
 | ![Web App](https://raw.githubusercontent.com/Jay-S9/miui-lsa-decryptor/main/assets/screenshot-web.png) | ![Desktop App](https://raw.githubusercontent.com/Jay-S9/miui-lsa-decryptor/main/assets/screenshot-desktop.png) |
 
-> Add screenshots to the `assets/` folder and they'll appear here automatically.
-
 ---
 
 ## Features
