@@ -3,8 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LSA Decryptor — Recover Xiaomi Secret Album Files</title>
-<meta name="description" content="Decrypt .lsa and .lsav files from Xiaomi MIUI Secret Album. Free, private, runs entirely in your browser — your files never leave your device.">
+<title>LSA & LSAV Decryptor — Free Offline Xiaomi MIUI Secret Album Recovery</title>
+<meta name="description" content="Decrypt .lsa and .lsav files from Xiaomi, Redmi, and POCO MIUI/HyperOS Secret Album for free. Runs entirely in your browser via Web Crypto — files never leave your device. No upload, no account.">
+<link rel="canonical" href="https://miui-lsa-decryptor.vercel.app/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="LSA & LSAV Decryptor — Free Offline Xiaomi MIUI Secret Album Recovery">
+<meta property="og:description" content="Decrypt .lsa and .lsav files from Xiaomi, Redmi, and POCO MIUI/HyperOS Secret Album for free. Runs entirely in your browser — files never leave your device.">
+<meta property="og:url" content="https://miui-lsa-decryptor.vercel.app/">
+<meta property="og:site_name" content="LSA Decryptor">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LSA & LSAV Decryptor — Free Offline Xiaomi MIUI Secret Album Recovery">
+<meta name="twitter:description" content="Decrypt .lsa and .lsav files from Xiaomi, Redmi, and POCO MIUI/HyperOS Secret Album for free. Runs entirely in your browser.">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LSA & LSAV Decryptor",
+  "url": "https://miui-lsa-decryptor.vercel.app/",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any (runs in browser)",
+  "description": "Free, offline, browser-based tool to decrypt .lsa and .lsav files from Xiaomi MIUI/HyperOS Gallery Secret Album, recovering original photos and videos as JPEG, PNG, and MP4 using client-side AES-128-CTR decryption.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Jay Solanki"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -570,7 +606,7 @@
   .btn-support:hover { transform: translateY(-1px); opacity: 0.9; }
 
   .btn-kofi    { background: #FF5E5B; color: #fff; }
-  .btn-gumroad { background: var(--accent); color: #000; }
+  .btn-Download    { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
   .btn-github  { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
 
   /* ══ FOOTER ══ */
@@ -642,9 +678,7 @@
       Works on every Xiaomi, Redmi &amp; POCO device.
     </p>
     <div class="privacy-note">Your files never leave your device — processed entirely in-browser</div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em">
-      Original tool by <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:var(--text3);text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a>
-    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3D5566;margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em">Original tool by <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:#3D5566;text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a></div>
 
     <!-- Drop zone -->
     <div class="drop-zone" id="drop-zone">
@@ -751,7 +785,7 @@
       </p>
       <div class="support-btns">
         <a href="https://ko-fi.com/jays9" target="_blank" class="btn-support btn-kofi">☕ Buy me a coffee</a>
-        <a href="https://gumroad.com/jays9" target="_blank" class="btn-support btn-gumroad">⬇ Download desktop app</a>
+        <a href="https://github.com/Jay-S9/miui-lsa-decryptor/zipball/main" target="_blank" class="btn-support btn-Download"> Download app from here</a>
         <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" class="btn-support btn-github">★ Star on GitHub</a>
       </div>
     </div>
@@ -761,7 +795,7 @@
 <!-- ══ FOOTER ══ -->
 <div class="wrap">
   <footer>
-    <div>LSA Decryptor — Built by <a href="https://github.com/Jay-S9" target="_blank" style="color:var(--accent);text-decoration:none">Jay-S9</a> — MIT License</div>
+    <div>LSA Decryptor — Built by <a href="https://github.com/Jay-S9" target="_blank" style="color:#3D5566;text-decoration:none">Jay-S9</a> — MIT License</div>
     <div style="display:flex;gap:20px">
       <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank">GitHub</a>
       <a href="#how">How it works</a>

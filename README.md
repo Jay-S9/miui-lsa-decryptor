@@ -1,9 +1,18 @@
 # MIUI LSA Decryptor
 
+miui-lsa-decryptor is a free, open-source, offline tool that decrypts .lsa and .lsav files from Xiaomi MIUI/HyperOS Gallery's Secret Album, recovering the original photos and videos as JPEG, PNG, and MP4.
+
+> **Note:** This tool is intended for recovering your own photos and videos
+> from your own device's Secret Album. It does not bypass phone locks,
+> passwords, or any other security — it only decrypts `.lsa`/`.lsav` files
+> you already have access to. See [Disclaimer](#disclaimer) below for full details.
+
 **Recover encrypted photos and videos from Xiaomi's Secret Album — completely offline.**
 
 MIUI Gallery's "Secret Album" feature encrypts every photo and video you move into it, saving them as `.lsa` (photos) and `.lsav` (videos) files. This tool reverses that encryption and gives you back your original JPEGs, PNGs, and MP4s — no account needed, no internet, no cloud.
 
+- **Wide device coverage** — works on Xiaomi, Redmi, and POCO devices running MIUI 12 through HyperOS 2, since all three brands share the same MIUI Gallery Secret Album encryption scheme
+  
 ---
 
 ## Features
@@ -150,6 +159,35 @@ miui-lsa-decryptor/
 ## Disclaimer
 
 This tool is for **personal data recovery only** — to help you access your own photos and videos. The encryption keys are embedded in a publicly distributed APK and are identical for all users; no credentials or accounts are bypassed. Use responsibly.
+
+---
+
+## FAQ
+
+**Is this safe? Do my files get uploaded anywhere?**
+No. Everything runs locally on your machine (or entirely in-browser via the
+hosted version). Your photos and videos never leave your device.
+
+**Does this work on Redmi and POCO phones, not just Xiaomi?**
+Yes. Redmi and POCO both run MIUI/HyperOS with the same Gallery app and the
+same encryption scheme, so this tool works identically on all three brands.
+
+**Do I need my phone connected while decrypting?**
+No. Copy the `.lsa`/`.lsav` files to your computer first — the phone isn't
+needed during decryption itself.
+
+**Is this free?**
+Yes, fully free and open source (MIT license). No per-file or per-MB charges.
+
+**What MIUI/HyperOS versions does this support?**
+Any version where MIUI Gallery uses AES-128-CTR with the key derived from
+the Gallery APK's signing certificate — this has been consistent from
+MIUI 12 through HyperOS 2.
+
+**My file won't decrypt / looks corrupted. What do I do?**
+Open an issue with the file's size and your MIUI Gallery version — most
+failures are due to a Gallery APK signing-key mismatch across regional
+builds (Global vs. China vs. EU).
 
 ---
 
