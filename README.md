@@ -11,8 +11,24 @@ miui-lsa-decryptor is a free, open-source, offline tool that decrypts .lsa and .
 
 MIUI Gallery's "Secret Album" feature encrypts every photo and video you move into it, saving them as `.lsa` (photos) and `.lsav` (videos) files. This tool reverses that encryption and gives you back your original JPEGs, PNGs, and MP4s — no account needed, no internet, no cloud.
 
+
+**🌐 Web version (no install):** [miui-lsa-decryptor.vercel.app](https://miui-lsa-decryptor.vercel.app) — runs entirely in your browser, nothing to download.
+
+**⬇ Desktop app:** Download `LSA-Decryptor.exe` from the [latest release](https://github.com/Jay-S9/miui-lsa-decryptor/releases/latest) — no Python needed, just double-click.
+
 - **Wide device coverage** — works on Xiaomi, Redmi, and POCO devices running MIUI 12 through HyperOS 2, since all three brands share the same MIUI Gallery Secret Album encryption scheme
   
+
+---
+
+## Screenshots
+
+| Web App | Desktop App |
+|---------|-------------|
+| ![Web App](https://raw.githubusercontent.com/Jay-S9/miui-lsa-decryptor/main/assets/screenshot-web.png) | ![Desktop App](https://raw.githubusercontent.com/Jay-S9/miui-lsa-decryptor/main/assets/screenshot-desktop.png) |
+
+> Add screenshots to the `assets/` folder and they'll appear here automatically.
+
 ---
 
 ## Features
@@ -20,6 +36,7 @@ MIUI Gallery's "Secret Album" feature encrypts every photo and video you move in
 | | |
 |---|---|
 | **Fully offline** | Decryption happens on your machine. Your files never leave it. |
+| **HyperOS 2.0 support** | Confirmed working on HyperOS 1 and HyperOS 2 alongside all MIUI versions. |
 | **Both file types** | Handles `.lsa` photos and `.lsav` videos from MIUI Secret Album |
 | **Batch processing** | Drop an entire `secretAlbum/` folder and process everything at once |
 | **GUI + CLI + Context menu** | Three ways to use it — pick what suits you |
@@ -156,6 +173,26 @@ miui-lsa-decryptor/
 
 ---
 
+## Быстрый старт (Russian / Русский)
+
+Для пользователей Xiaomi, Redmi и POCO — инструмент для расшифровки файлов `.lsa` и `.lsav` из «Секретного альбома» MIUI/HyperOS Gallery.
+
+**Как найти файлы:**
+
+Подключите телефон через USB → выберите **Передача файлов** → откройте:
+
+```
+Внутренняя память → MIUI → Gallery → cloud → secretAlbum
+```
+
+Файлы имеют хеш-имена вида `3e751332435bfad27569ca4efed1b602.lsav` — это нормально.
+
+**Использование (без установки):** [miui-lsa-decryptor.vercel.app](https://miui-lsa-decryptor.vercel.app)
+
+**Скачать приложение для Windows:** [Последний релиз](https://github.com/Jay-S9/miui-lsa-decryptor/releases/latest)
+
+---
+
 ## Disclaimer
 
 This tool is for **personal data recovery only** — to help you access your own photos and videos. The encryption keys are embedded in a publicly distributed APK and are identical for all users; no credentials or accounts are bypassed. Use responsibly.
@@ -188,6 +225,12 @@ MIUI 12 through HyperOS 2.
 Open an issue with the file's size and your MIUI Gallery version — most
 failures are due to a Gallery APK signing-key mismatch across regional
 builds (Global vs. China vs. EU).
+
+---
+
+## Contributing
+
+Found a file that won't decrypt? Got a feature idea? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 

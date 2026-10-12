@@ -39,6 +39,18 @@
     "name": "Jay Solanki"
   }
 }
+
+// ══ Lightbox ══
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -365,6 +377,38 @@
     transition: color 0.15s;
   }
   .remove-btn:hover { color: var(--error); }
+
+  .preview-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+  .preview-thumb:hover { transform: scale(1.08); }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  }
+
 
   /* ══ ACTIONS ══ */
   .actions {
@@ -804,6 +848,12 @@
   </footer>
 </div>
 
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="Preview">
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -905,14 +955,19 @@ function renderList() {
       pending: ['pending', 'READY'],
       working: ['working', 'DECRYPTING…'],
       done:    ['done',    'DONE ✓'],
-      error:   ['error',   'ERROR'],
+      error:   ['error',   item.errorMsg ? item.errorMsg.slice(0,28) : 'ERROR'],
     };
     const [cls, label] = statusMap[item.status];
+
+    const thumbHtml = (item.previewUrl)
+      ? `<img class="preview-thumb" src="${item.previewUrl}" title="Click to preview" onclick="openLightbox('${item.previewUrl}')">`
+      : '';
 
     div.innerHTML = `
       <span class="file-type ${item.ext}">.${item.ext}</span>
       <span class="file-name">${item.file.name}</span>
       <span class="file-size">${formatSize(item.file.size)}</span>
+      ${thumbHtml}
       <span class="file-status ${cls}">${label}</span>
       ${item.status === 'pending' ? `<button class="remove-btn" onclick="removeFile('${item.id}')">×</button>` : ''}
     `;
@@ -954,15 +1009,35 @@ async function startDecryption() {
 
     try {
       const buf       = await item.file.arrayBuffer();
+
+      // Minimum size check
+      if (buf.byteLength < 16) {
+        throw new Error('File too small — not a valid .lsa/.lsav file');
+      }
+
       const isVideo   = item.ext === 'lsav';
       const decrypted = await decryptBuffer(buf, isVideo);
       const ext       = detectExtension(decrypted);
       const stem      = item.file.name.replace(/\.(lsa|lsav)$/i, '');
       const mimeMap   = { '.jpg':'image/jpeg','.png':'image/png','.mp4':'video/mp4','.mkv':'video/x-matroska','.gif':'image/gif','.bin':'application/octet-stream' };
-      const blob      = new Blob([decrypted], { type: mimeMap[ext] || 'application/octet-stream' });
+      const mimeType  = mimeMap[ext] || 'application/octet-stream';
+      const blob      = new Blob([decrypted], { type: mimeType });
+
+      // Store preview URL for images
+      if (['.jpg', '.png', '.gif'].includes(ext)) {
+        item.previewUrl = URL.createObjectURL(blob);
+      }
+
       downloadBlob(blob, stem + '_decrypted' + ext);
       setItemStatus(item.id, 'done');
     } catch (e) {
+      // Human-readable error messages
+      let msg = e.message || 'Unknown error';
+      if (msg.includes('too small'))        msg = 'File too small — not a valid .lsa/.lsav file';
+      else if (msg.includes('key'))         msg = 'Key error — file may use a different Gallery version';
+      else if (msg.includes('decrypt'))     msg = 'Decryption failed — try the desktop app instead';
+      else if (msg.includes('buffer'))      msg = 'File read error — file may be corrupted';
+      item.errorMsg = msg;
       setItemStatus(item.id, 'error');
       console.error(item.file.name, e);
     }
@@ -1004,6 +1079,18 @@ function showToast(msg, type='success') {
   t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+
+// ══ Lightbox ══
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
 </script>
 </body>
 </html>
