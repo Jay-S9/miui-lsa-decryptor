@@ -40,6 +40,59 @@
   }
 }
 
+
+// ══ ZIP Download ══
+async function downloadZip() {
+  if (!decryptedBlobs.length) return;
+
+  const btn      = document.getElementById('zip-btn');
+  const progress = document.getElementById('zip-progress');
+
+  btn.textContent = '⏳  Packing ZIP…';
+  btn.style.pointerEvents = 'none';
+  progress.textContent = `Compressing ${decryptedBlobs.length} files…`;
+  progress.classList.add('visible');
+
+  try {
+    const zip = new JSZip();
+    const folder = zip.folder('lsa_decrypted');
+
+    for (const { filename, blob } of decryptedBlobs) {
+      const buf = await blob.arrayBuffer();
+      folder.file(filename, buf);
+    }
+
+    progress.textContent = 'Generating ZIP file…';
+
+    const zipBlob = await zip.generateAsync(
+      { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      (metadata) => {
+        progress.textContent = `Compressing… ${metadata.percent.toFixed(0)}%`;
+      }
+    );
+
+    // Download the ZIP
+    const url = URL.createObjectURL(zipBlob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = `lsa_decrypted_${decryptedBlobs.length}_files.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+
+    btn.textContent = `✓  ZIP downloaded (${decryptedBlobs.length} files)`;
+    btn.style.color = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+    progress.classList.remove('visible');
+
+  } catch (err) {
+    btn.textContent = '⬇  Download all as ZIP';
+    btn.style.pointerEvents = 'auto';
+    progress.textContent = 'ZIP failed — try downloading files individually';
+    console.error('ZIP error:', err);
+  }
+}
+
 // ══ Lightbox ══
 function openLightbox(url) {
   document.getElementById('lightbox-img').src = url;
@@ -689,6 +742,40 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
   .toast.success { border-color: var(--success); color: var(--success); }
   .toast.error   { border-color: var(--error);   color: var(--error); }
 
+
+  .btn-zip {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--accent2);
+    color: var(--accent);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-family: var(--sans);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+    margin-top: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-zip:hover { background: rgba(0,229,176,0.08); }
+  .btn-zip:active { transform: scale(0.99); }
+  .btn-zip.visible { display: flex; }
+
+  .zip-progress {
+    display: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    text-align: center;
+    margin-top: 6px;
+  }
+  .zip-progress.visible { display: block; }
+
   @media (max-width: 600px) {
     .nav-links { gap: 14px; }
     .trust-strip { flex-direction: column; gap: 16px; }
@@ -696,6 +783,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
     footer { flex-direction: column; text-align: center; }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -741,6 +829,11 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
       </button>
       <button class="btn-clear" onclick="clearAll()">Clear</button>
     </div>
+
+    <button class="btn-zip" id="zip-btn" onclick="downloadZip()">
+      ⬇  Download all as ZIP
+    </button>
+    <div class="zip-progress" id="zip-progress"></div>
 
     <div class="progress-wrap" id="progress-wrap">
       <div class="progress-bar-track">
@@ -930,6 +1023,7 @@ function downloadBlob(blob, filename) {
 
 // ══ File queue ══
 let fileQueue = [];
+let decryptedBlobs = [];  // Stores {filename, blob} for ZIP download
 
 function addFiles(files) {
   for (const f of files) {
@@ -985,6 +1079,9 @@ function removeFile(id) {
 
 function clearAll() {
   fileQueue = [];
+  decryptedBlobs = [];
+  document.getElementById('zip-btn').classList.remove('visible');
+  document.getElementById('zip-progress').classList.remove('visible');
   renderList();
   document.getElementById('progress-wrap').classList.remove('visible');
 }
@@ -1028,6 +1125,9 @@ async function startDecryption() {
         item.previewUrl = URL.createObjectURL(blob);
       }
 
+      // Store for ZIP download
+      decryptedBlobs.push({ filename: stem + '_decrypted' + ext, blob });
+
       downloadBlob(blob, stem + '_decrypted' + ext);
       setItemStatus(item.id, 'done');
     } catch (e) {
@@ -1047,6 +1147,13 @@ async function startDecryption() {
   updateProgress(pending.length, pending.length, '');
   document.getElementById('progress-label').textContent = `Done — ${done} file${done!==1?'s':''} decrypted`;
   showToast(`${done} file${done!==1?'s':''} decrypted successfully`, 'success');
+
+  // Show ZIP button if more than one file was decrypted
+  if (decryptedBlobs.length > 1) {
+    const zipBtn = document.getElementById('zip-btn');
+    zipBtn.textContent = `⬇  Download all ${decryptedBlobs.length} files as ZIP`;
+    zipBtn.classList.add('visible');
+  }
 }
 
 function updateProgress(current, total, filename) {
@@ -1078,6 +1185,59 @@ function showToast(msg, type='success') {
   t.textContent = msg;
   t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+
+// ══ ZIP Download ══
+async function downloadZip() {
+  if (!decryptedBlobs.length) return;
+
+  const btn      = document.getElementById('zip-btn');
+  const progress = document.getElementById('zip-progress');
+
+  btn.textContent = '⏳  Packing ZIP…';
+  btn.style.pointerEvents = 'none';
+  progress.textContent = `Compressing ${decryptedBlobs.length} files…`;
+  progress.classList.add('visible');
+
+  try {
+    const zip = new JSZip();
+    const folder = zip.folder('lsa_decrypted');
+
+    for (const { filename, blob } of decryptedBlobs) {
+      const buf = await blob.arrayBuffer();
+      folder.file(filename, buf);
+    }
+
+    progress.textContent = 'Generating ZIP file…';
+
+    const zipBlob = await zip.generateAsync(
+      { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      (metadata) => {
+        progress.textContent = `Compressing… ${metadata.percent.toFixed(0)}%`;
+      }
+    );
+
+    // Download the ZIP
+    const url = URL.createObjectURL(zipBlob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = `lsa_decrypted_${decryptedBlobs.length}_files.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+
+    btn.textContent = `✓  ZIP downloaded (${decryptedBlobs.length} files)`;
+    btn.style.color = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+    progress.classList.remove('visible');
+
+  } catch (err) {
+    btn.textContent = '⬇  Download all as ZIP';
+    btn.style.pointerEvents = 'auto';
+    progress.textContent = 'ZIP failed — try downloading files individually';
+    console.error('ZIP error:', err);
+  }
 }
 
 // ══ Lightbox ══
