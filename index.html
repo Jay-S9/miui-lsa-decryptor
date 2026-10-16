@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LSA & LSAV Decryptor — Free Offline Xiaomi MIUI Secret Album Recovery</title>
-<meta name="description" content="Decrypt .lsa and .lsav files from Xiaomi, Redmi, and POCO MIUI/HyperOS Secret Album for free. Runs entirely in your browser via Web Crypto — files never leave your device. No upload, no account.">
+<title>LSA & LSAV Decryptor — Free Xiaomi MIUI HyperOS Secret Album Recovery Tool</title>
+<meta name="description" content="Free online tool to decrypt .lsa photos and .lsav videos from Xiaomi MIUI / HyperOS Secret Album. Convert lsa to JPG, lsav to MP4 — runs in your browser, no upload, no install. Works on Xiaomi, Redmi, POCO.">
 <link rel="canonical" href="https://miui-lsa-decryptor.vercel.app/">
 
 <!-- Open Graph -->
@@ -784,6 +784,134 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
   }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Language alternates -->
+  <link rel="alternate" hreflang="en" href="https://miui-lsa-decryptor.vercel.app/">
+  <link rel="alternate" hreflang="ru" href="https://miui-lsa-decryptor.vercel.app/">
+  <link rel="alternate" hreflang="x-default" href="https://miui-lsa-decryptor.vercel.app/">
+
+  <!-- Additional keywords -->
+  <meta name="keywords" content="lsa decryptor, lsav decryptor, lsa to jpg, lsav to mp4, xiaomi secret album decrypt, miui secret album recovery, hyperos secret album, decrypt lsa file online, lsa file opener, xiaomi gallery decrypt, redmi secret album, poco secret album, miui lsa lsav">
+  <meta name="author" content="Jay-S9">
+  <meta name="robots" content="index, follow">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "LSA & LSAV Decryptor",
+        "url": "https://miui-lsa-decryptor.vercel.app",
+        "description": "Free tool to decrypt .lsa and .lsav files from Xiaomi MIUI / HyperOS Secret Album. Converts encrypted photos and videos back to JPEG and MP4 format entirely in your browser.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Web Browser, Windows",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Jay-S9",
+          "url": "https://github.com/Jay-S9"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "softwareVersion": "8.0.0",
+        "featureList": [
+          "Decrypt .lsa encrypted photos",
+          "Decrypt .lsav encrypted videos",
+          "Batch processing with ZIP download",
+          "100% offline — files never uploaded",
+          "Supports MIUI 12, 13, 14, HyperOS 1, HyperOS 2",
+          "Works on Xiaomi, Redmi, POCO devices"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What are .lsa and .lsav files?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": ".lsa files are encrypted photos from Xiaomi MIUI / HyperOS Gallery Secret Album. .lsav files are encrypted videos from the same feature. They are stored in Internal Storage → MIUI → Gallery → cloud → secretAlbum on your device."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I decrypt .lsa files?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Use LSA Decryptor at miui-lsa-decryptor.vercel.app. Drag and drop your .lsa or .lsav files into the tool, click Decrypt, and download your recovered JPEG or MP4 files. Everything runs in your browser — no upload needed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I convert lsav to MP4?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Drop your .lsav file into LSA Decryptor at miui-lsa-decryptor.vercel.app. The tool decrypts the video header and reconstructs the original MP4 file automatically, which downloads directly to your device."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is this tool safe? Do my files get uploaded?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, completely safe. All decryption happens in your browser using the Web Crypto API. Your files are never uploaded to any server. The source code is open on GitHub for anyone to verify."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does it work on Redmi and POCO phones?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Redmi and POCO both use the same MIUI / HyperOS Gallery app with the same encryption scheme, so this tool works identically on all three brands."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which MIUI and HyperOS versions are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The tool supports MIUI 12, MIUI 13, MIUI 14, HyperOS 1, and HyperOS 2. All versions use the same AES-128-CTR encryption scheme with a key derived from the Gallery APK signing certificate."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to decrypt MIUI Secret Album .lsa and .lsav files",
+        "description": "Step by step guide to recover encrypted photos and videos from Xiaomi MIUI or HyperOS Secret Album",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Find your encrypted files",
+            "text": "Connect your Xiaomi phone via USB, enable File Transfer mode, and navigate to Internal Storage → MIUI → Gallery → cloud → secretAlbum. Copy the files to your PC."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Open the decryptor",
+            "text": "Go to miui-lsa-decryptor.vercel.app in any browser. No installation or account required."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Drop your files",
+            "text": "Drag and drop your .lsa photos or .lsav videos into the drop zone, or click Browse files to select them."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Decrypt and download",
+            "text": "Click Decrypt Files. Your original JPEG, PNG, or MP4 files download automatically. For multiple files, use the Download all as ZIP button."
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
 </head>
 <body>
 
@@ -806,8 +934,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
     <div class="badge">Free &amp; Open Source</div>
     <h1>Recover your<br><span>Secret Album</span> files</h1>
     <p class="hero-sub">
-      Decrypt .lsa photos and .lsav videos from Xiaomi MIUI Gallery.
-      Works on every Xiaomi, Redmi &amp; POCO device.
+      Convert .lsa to JPG and .lsav to MP4 from Xiaomi MIUI / HyperOS Secret Album.
+      Free, offline, works on every Xiaomi, Redmi &amp; POCO device.
     </p>
     <div class="privacy-note">Your files never leave your device — processed entirely in-browser</div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3D5566;margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em">Original tool by <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:#3D5566;text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a></div>
@@ -846,7 +974,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
     <div class="trust-strip">
       <div class="trust-item"><div class="trust-dot"></div>100% offline — no uploads</div>
       <div class="trust-item"><div class="trust-dot"></div>Lossless — original quality</div>
-      <div class="trust-item"><div class="trust-dot"></div>MIUI 12 · 13 · 14 · HyperOS</div>
+      <div class="trust-item"><div class="trust-dot"></div>MIUI 12–14 · HyperOS 1 & 2</div>
       <div class="trust-item"><div class="trust-dot"></div>Open source on GitHub</div>
     </div>
   </div>
@@ -905,7 +1033,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
       </div>
     </div>
     <p style="color:var(--text2);font-size:13px;font-family:var(--mono);line-height:1.7">
-      Files will have hashed names like <span style="color:var(--accent)">3e751332435bfad27569ca4efed1b602.lsav</span> — that's normal.
+      Files will have hashed names like <span style="color:var(--accent)">3e751332435bfad27569ca4efed1b602.lsav</span> — that's normal. These are your encrypted photos (.lsa → JPG/PNG) and videos (.lsav → MP4).
       Copy the entire secretAlbum folder to your PC before uploading here.
     </p>
   </div>
