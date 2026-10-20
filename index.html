@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LSA & LSAV Decryptor — Free Offline Xiaomi MIUI Secret Album Recovery</title>
-<meta name="description" content="Decrypt .lsa and .lsav files from Xiaomi, Redmi, and POCO MIUI/HyperOS Secret Album for free. Runs entirely in your browser via Web Crypto — files never leave your device. No upload, no account.">
+<title>LSA & LSAV Decryptor — Free Xiaomi MIUI HyperOS Secret Album Recovery Tool</title>
+<meta name="description" content="Free online tool to decrypt .lsa photos and .lsav videos from Xiaomi MIUI / HyperOS Secret Album. Convert lsa to JPG, lsav to MP4 — runs in your browser, no upload, no install. Works on Xiaomi, Redmi, POCO.">
 <link rel="canonical" href="https://miui-lsa-decryptor.vercel.app/">
 
 <!-- Open Graph -->
@@ -39,6 +39,71 @@
     "name": "Jay Solanki"
   }
 }
+
+
+// ══ ZIP Download ══
+async function downloadZip() {
+  if (!decryptedBlobs.length) return;
+
+  const btn      = document.getElementById('zip-btn');
+  const progress = document.getElementById('zip-progress');
+
+  btn.textContent = '⏳  Packing ZIP…';
+  btn.style.pointerEvents = 'none';
+  progress.textContent = `Compressing ${decryptedBlobs.length} files…`;
+  progress.classList.add('visible');
+
+  try {
+    const zip = new JSZip();
+    const folder = zip.folder('lsa_decrypted');
+
+    for (const { filename, blob } of decryptedBlobs) {
+      const buf = await blob.arrayBuffer();
+      folder.file(filename, buf);
+    }
+
+    progress.textContent = 'Generating ZIP file…';
+
+    const zipBlob = await zip.generateAsync(
+      { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      (metadata) => {
+        progress.textContent = `Compressing… ${metadata.percent.toFixed(0)}%`;
+      }
+    );
+
+    // Download the ZIP
+    const url = URL.createObjectURL(zipBlob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = `lsa_decrypted_${decryptedBlobs.length}_files.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+
+    btn.textContent = `✓  ZIP downloaded (${decryptedBlobs.length} files)`;
+    btn.style.color = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+    progress.classList.remove('visible');
+
+  } catch (err) {
+    btn.textContent = '⬇  Download all as ZIP';
+    btn.style.pointerEvents = 'auto';
+    progress.textContent = 'ZIP failed — try downloading files individually';
+    console.error('ZIP error:', err);
+  }
+}
+
+// ══ Lightbox ══
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -373,6 +438,38 @@
   }
   .remove-btn:hover { color: var(--error); }
 
+  .preview-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+  .preview-thumb:hover { transform: scale(1.08); }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  }
+
+
   /* ══ ACTIONS ══ */
   .actions {
     display: flex;
@@ -652,6 +749,40 @@
   .toast.success { border-color: var(--success); color: var(--success); }
   .toast.error   { border-color: var(--error);   color: var(--error); }
 
+
+  .btn-zip {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--accent2);
+    color: var(--accent);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-family: var(--sans);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+    margin-top: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-zip:hover { background: rgba(0,229,176,0.08); }
+  .btn-zip:active { transform: scale(0.99); }
+  .btn-zip.visible { display: flex; }
+
+  .zip-progress {
+    display: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    text-align: center;
+    margin-top: 6px;
+  }
+  .zip-progress.visible { display: block; }
+
   @media (max-width: 600px) {
     .nav-links { gap: 14px; }
     .trust-strip { flex-direction: column; gap: 16px; }
@@ -659,6 +790,135 @@
     footer { flex-direction: column; text-align: center; }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Language alternates -->
+  <link rel="alternate" hreflang="en" href="https://miui-lsa-decryptor.vercel.app/">
+  <link rel="alternate" hreflang="ru" href="https://miui-lsa-decryptor.vercel.app/">
+  <link rel="alternate" hreflang="x-default" href="https://miui-lsa-decryptor.vercel.app/">
+
+  <!-- Additional keywords -->
+  <meta name="keywords" content="lsa decryptor, lsav decryptor, lsa to jpg, lsav to mp4, xiaomi secret album decrypt, miui secret album recovery, hyperos secret album, decrypt lsa file online, lsa file opener, xiaomi gallery decrypt, redmi secret album, poco secret album, miui lsa lsav">
+  <meta name="author" content="Jay-S9">
+  <meta name="robots" content="index, follow">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "LSA & LSAV Decryptor",
+        "url": "https://miui-lsa-decryptor.vercel.app",
+        "description": "Free tool to decrypt .lsa and .lsav files from Xiaomi MIUI / HyperOS Secret Album. Converts encrypted photos and videos back to JPEG and MP4 format entirely in your browser.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Web Browser, Windows",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Jay-S9",
+          "url": "https://github.com/Jay-S9"
+        },
+        "license": "https://opensource.org/licenses/MIT",
+        "softwareVersion": "8.0.0",
+        "featureList": [
+          "Decrypt .lsa encrypted photos",
+          "Decrypt .lsav encrypted videos",
+          "Batch processing with ZIP download",
+          "100% offline — files never uploaded",
+          "Supports MIUI 12, 13, 14, HyperOS 1, HyperOS 2",
+          "Works on Xiaomi, Redmi, POCO devices"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What are .lsa and .lsav files?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": ".lsa files are encrypted photos from Xiaomi MIUI / HyperOS Gallery Secret Album. .lsav files are encrypted videos from the same feature. They are stored in Internal Storage → MIUI → Gallery → cloud → secretAlbum on your device."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I decrypt .lsa files?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Use LSA Decryptor at miui-lsa-decryptor.vercel.app. Drag and drop your .lsa or .lsav files into the tool, click Decrypt, and download your recovered JPEG or MP4 files. Everything runs in your browser — no upload needed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I convert lsav to MP4?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Drop your .lsav file into LSA Decryptor at miui-lsa-decryptor.vercel.app. The tool decrypts the video header and reconstructs the original MP4 file automatically, which downloads directly to your device."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is this tool safe? Do my files get uploaded?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, completely safe. All decryption happens in your browser using the Web Crypto API. Your files are never uploaded to any server. The source code is open on GitHub for anyone to verify."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does it work on Redmi and POCO phones?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Redmi and POCO both use the same MIUI / HyperOS Gallery app with the same encryption scheme, so this tool works identically on all three brands."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which MIUI and HyperOS versions are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The tool supports MIUI 12, MIUI 13, MIUI 14, HyperOS 1, and HyperOS 2. All versions use the same AES-128-CTR encryption scheme with a key derived from the Gallery APK signing certificate."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to decrypt MIUI Secret Album .lsa and .lsav files",
+        "description": "Step by step guide to recover encrypted photos and videos from Xiaomi MIUI or HyperOS Secret Album",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Find your encrypted files",
+            "text": "Connect your Xiaomi phone via USB, enable File Transfer mode, and navigate to Internal Storage → MIUI → Gallery → cloud → secretAlbum. Copy the files to your PC."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Open the decryptor",
+            "text": "Go to miui-lsa-decryptor.vercel.app in any browser. No installation or account required."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Drop your files",
+            "text": "Drag and drop your .lsa photos or .lsav videos into the drop zone, or click Browse files to select them."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Decrypt and download",
+            "text": "Click Decrypt Files. Your original JPEG, PNG, or MP4 files download automatically. For multiple files, use the Download all as ZIP button."
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
 </head>
 <body>
 
@@ -681,10 +941,11 @@
     <div class="badge">Free &amp; Open Source</div>
     <h1>Recover your<br><span>Secret Album</span> files</h1>
     <p class="hero-sub">
-      Decrypt .lsa photos and .lsav videos from Xiaomi MIUI Gallery.
-      Works on every Xiaomi, Redmi &amp; POCO device.
+      Convert .lsa to JPG and .lsav to MP4 from Xiaomi MIUI / HyperOS Secret Album.
+      Free, offline, works on every Xiaomi, Redmi &amp; POCO device.
     </p>
     <div class="privacy-note">Your files never leave your device — processed entirely in-browser</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3D5566;margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em">Original tool by <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:#3D5566;text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a></div>
 
     <!-- Drop zone -->
     <div class="drop-zone" id="drop-zone">
@@ -704,6 +965,11 @@
       <button class="btn-clear" onclick="clearAll()">Clear</button>
     </div>
 
+    <button class="btn-zip" id="zip-btn" onclick="downloadZip()">
+      ⬇  Download all as ZIP
+    </button>
+    <div class="zip-progress" id="zip-progress"></div>
+
     <div class="progress-wrap" id="progress-wrap">
       <div class="progress-bar-track">
         <div class="progress-bar-fill" id="progress-fill"></div>
@@ -715,7 +981,7 @@
     <div class="trust-strip">
       <div class="trust-item"><div class="trust-dot"></div>100% offline — no uploads</div>
       <div class="trust-item"><div class="trust-dot"></div>Lossless — original quality</div>
-      <div class="trust-item"><div class="trust-dot"></div>MIUI 12 · 13 · 14 · HyperOS</div>
+      <div class="trust-item"><div class="trust-dot"></div>MIUI 12–14 · HyperOS 1 & 2</div>
       <div class="trust-item"><div class="trust-dot"></div>Open source on GitHub</div>
     </div>
   </div>
@@ -774,7 +1040,7 @@
       </div>
     </div>
     <p style="color:var(--text2);font-size:13px;font-family:var(--mono);line-height:1.7">
-      Files will have hashed names like <span style="color:var(--accent)">3e751332435bfad27569ca4efed1b602.lsav</span> — that's normal.
+      Files will have hashed names like <span style="color:var(--accent)">3e751332435bfad27569ca4efed1b602.lsav</span> — that's normal. These are your encrypted photos (.lsa → JPG/PNG) and videos (.lsav → MP4).
       Copy the entire secretAlbum folder to your PC before uploading here.
     </p>
   </div>
@@ -801,13 +1067,19 @@
 <!-- ══ FOOTER ══ -->
 <div class="wrap">
   <footer>
-    <div>LSA Decryptor — MIT License</div>
+    <div>LSA Decryptor — Built by <a href="https://github.com/Jay-S9" target="_blank" style="color:#3D5566;text-decoration:none">Jay-S9</a> — MIT License</div>
     <div style="display:flex;gap:20px">
       <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank">GitHub</a>
       <a href="#how">How it works</a>
       <a href="mailto:solanki9jay@email.com">Contact</a>
     </div>
   </footer>
+</div>
+
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="Preview">
 </div>
 
 <!-- Toast -->
@@ -886,6 +1158,7 @@ function downloadBlob(blob, filename) {
 
 // ══ File queue ══
 let fileQueue = [];
+let decryptedBlobs = [];  // Stores {filename, blob} for ZIP download
 
 function addFiles(files) {
   for (const f of files) {
@@ -911,14 +1184,19 @@ function renderList() {
       pending: ['pending', 'READY'],
       working: ['working', 'DECRYPTING…'],
       done:    ['done',    'DONE ✓'],
-      error:   ['error',   'ERROR'],
+      error:   ['error',   item.errorMsg ? item.errorMsg.slice(0,28) : 'ERROR'],
     };
     const [cls, label] = statusMap[item.status];
+
+    const thumbHtml = (item.previewUrl)
+      ? `<img class="preview-thumb" src="${item.previewUrl}" title="Click to preview" onclick="openLightbox('${item.previewUrl}')">`
+      : '';
 
     div.innerHTML = `
       <span class="file-type ${item.ext}">.${item.ext}</span>
       <span class="file-name">${item.file.name}</span>
       <span class="file-size">${formatSize(item.file.size)}</span>
+      ${thumbHtml}
       <span class="file-status ${cls}">${label}</span>
       ${item.status === 'pending' ? `<button class="remove-btn" onclick="removeFile('${item.id}')">×</button>` : ''}
     `;
@@ -936,6 +1214,9 @@ function removeFile(id) {
 
 function clearAll() {
   fileQueue = [];
+  decryptedBlobs = [];
+  document.getElementById('zip-btn').classList.remove('visible');
+  document.getElementById('zip-progress').classList.remove('visible');
   renderList();
   document.getElementById('progress-wrap').classList.remove('visible');
 }
@@ -960,15 +1241,38 @@ async function startDecryption() {
 
     try {
       const buf       = await item.file.arrayBuffer();
+
+      // Minimum size check
+      if (buf.byteLength < 16) {
+        throw new Error('File too small — not a valid .lsa/.lsav file');
+      }
+
       const isVideo   = item.ext === 'lsav';
       const decrypted = await decryptBuffer(buf, isVideo);
       const ext       = detectExtension(decrypted);
       const stem      = item.file.name.replace(/\.(lsa|lsav)$/i, '');
       const mimeMap   = { '.jpg':'image/jpeg','.png':'image/png','.mp4':'video/mp4','.mkv':'video/x-matroska','.gif':'image/gif','.bin':'application/octet-stream' };
-      const blob      = new Blob([decrypted], { type: mimeMap[ext] || 'application/octet-stream' });
+      const mimeType  = mimeMap[ext] || 'application/octet-stream';
+      const blob      = new Blob([decrypted], { type: mimeType });
+
+      // Store preview URL for images
+      if (['.jpg', '.png', '.gif'].includes(ext)) {
+        item.previewUrl = URL.createObjectURL(blob);
+      }
+
+      // Store for ZIP download
+      decryptedBlobs.push({ filename: stem + '_decrypted' + ext, blob });
+
       downloadBlob(blob, stem + '_decrypted' + ext);
       setItemStatus(item.id, 'done');
     } catch (e) {
+      // Human-readable error messages
+      let msg = e.message || 'Unknown error';
+      if (msg.includes('too small'))        msg = 'File too small — not a valid .lsa/.lsav file';
+      else if (msg.includes('key'))         msg = 'Key error — file may use a different Gallery version';
+      else if (msg.includes('decrypt'))     msg = 'Decryption failed — try the desktop app instead';
+      else if (msg.includes('buffer'))      msg = 'File read error — file may be corrupted';
+      item.errorMsg = msg;
       setItemStatus(item.id, 'error');
       console.error(item.file.name, e);
     }
@@ -978,6 +1282,13 @@ async function startDecryption() {
   updateProgress(pending.length, pending.length, '');
   document.getElementById('progress-label').textContent = `Done — ${done} file${done!==1?'s':''} decrypted`;
   showToast(`${done} file${done!==1?'s':''} decrypted successfully`, 'success');
+
+  // Show ZIP button if more than one file was decrypted
+  if (decryptedBlobs.length > 1) {
+    const zipBtn = document.getElementById('zip-btn');
+    zipBtn.textContent = `⬇  Download all ${decryptedBlobs.length} files as ZIP`;
+    zipBtn.classList.add('visible');
+  }
 }
 
 function updateProgress(current, total, filename) {
@@ -1010,6 +1321,71 @@ function showToast(msg, type='success') {
   t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+
+
+// ══ ZIP Download ══
+async function downloadZip() {
+  if (!decryptedBlobs.length) return;
+
+  const btn      = document.getElementById('zip-btn');
+  const progress = document.getElementById('zip-progress');
+
+  btn.textContent = '⏳  Packing ZIP…';
+  btn.style.pointerEvents = 'none';
+  progress.textContent = `Compressing ${decryptedBlobs.length} files…`;
+  progress.classList.add('visible');
+
+  try {
+    const zip = new JSZip();
+    const folder = zip.folder('lsa_decrypted');
+
+    for (const { filename, blob } of decryptedBlobs) {
+      const buf = await blob.arrayBuffer();
+      folder.file(filename, buf);
+    }
+
+    progress.textContent = 'Generating ZIP file…';
+
+    const zipBlob = await zip.generateAsync(
+      { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      (metadata) => {
+        progress.textContent = `Compressing… ${metadata.percent.toFixed(0)}%`;
+      }
+    );
+
+    // Download the ZIP
+    const url = URL.createObjectURL(zipBlob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = `lsa_decrypted_${decryptedBlobs.length}_files.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+
+    btn.textContent = `✓  ZIP downloaded (${decryptedBlobs.length} files)`;
+    btn.style.color = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+    progress.classList.remove('visible');
+
+  } catch (err) {
+    btn.textContent = '⬇  Download all as ZIP';
+    btn.style.pointerEvents = 'auto';
+    progress.textContent = 'ZIP failed — try downloading files individually';
+    console.error('ZIP error:', err);
+  }
+}
+
+// ══ Lightbox ══
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
 </script>
 </body>
 </html>

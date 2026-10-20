@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://miui-lsa-decryptor.vercel.app/sitemap.xml
