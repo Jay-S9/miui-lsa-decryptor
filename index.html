@@ -94,6 +94,19 @@ async function downloadZip() {
 }
 
 // ══ Lightbox ══
+function openVideoLightbox(url) {
+  const video = document.getElementById('lightbox-video');
+  video.src = url;
+  document.getElementById('video-lightbox').classList.add('open');
+  video.play().catch(() => {});
+}
+function closeVideoLightbox() {
+  const video = document.getElementById('lightbox-video');
+  video.pause(); video.src = '';
+  document.getElementById('video-lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeVideoLightbox(); } });
+
 function openLightbox(url) {
   document.getElementById('lightbox-img').src = url;
   document.getElementById('lightbox').classList.add('open');
@@ -449,6 +462,19 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
     transition: transform 0.15s;
   }
   .preview-thumb:hover { transform: scale(1.08); }
+
+  .video-thumb {
+    width: 36px; height: 36px;
+    border-radius: 5px;
+    border: 1px solid var(--border2);
+    cursor: pointer; flex-shrink: 0;
+    background: var(--surface2);
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    font-size: 14px; color: var(--warning);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .video-thumb:hover { transform: scale(1.08); background: var(--border); }
 
   /* Lightbox */
   .lightbox {
@@ -1078,6 +1104,11 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbo
 
 
 <!-- Lightbox -->
+<div class="lightbox" id="video-lightbox" onclick="closeVideoLightbox()" style="flex-direction:column;gap:12px">
+  <video id="lightbox-video" controls style="max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,0.6)"></video>
+  <span style="color:#888;font-size:12px;font-family:var(--mono)">click outside to close</span>
+</div>
+
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <img id="lightbox-img" src="" alt="Preview">
 </div>
@@ -1188,8 +1219,10 @@ function renderList() {
     };
     const [cls, label] = statusMap[item.status];
 
-    const thumbHtml = (item.previewUrl)
-      ? `<img class="preview-thumb" src="${item.previewUrl}" title="Click to preview" onclick="openLightbox('${item.previewUrl}')">`
+    const thumbHtml = item.previewUrl
+      ? item.previewType === 'video'
+        ? `<span class="preview-thumb video-thumb" title="Click to preview" onclick="openVideoLightbox('${item.previewUrl}')">▶</span>`
+        : `<img class="preview-thumb" src="${item.previewUrl}" title="Click to preview" onclick="openLightbox('${item.previewUrl}')">`
       : '';
 
     div.innerHTML = `
@@ -1255,9 +1288,13 @@ async function startDecryption() {
       const mimeType  = mimeMap[ext] || 'application/octet-stream';
       const blob      = new Blob([decrypted], { type: mimeType });
 
-      // Store preview URL for images
+      // Store preview URL for images and videos
       if (['.jpg', '.png', '.gif'].includes(ext)) {
         item.previewUrl = URL.createObjectURL(blob);
+        item.previewType = 'image';
+      } else if (ext === '.mp4' || ext === '.mkv') {
+        item.previewUrl = URL.createObjectURL(blob);
+        item.previewType = 'video';
       }
 
       // Store for ZIP download
@@ -1376,6 +1413,19 @@ async function downloadZip() {
 }
 
 // ══ Lightbox ══
+function openVideoLightbox(url) {
+  const video = document.getElementById('lightbox-video');
+  video.src = url;
+  document.getElementById('video-lightbox').classList.add('open');
+  video.play().catch(() => {});
+}
+function closeVideoLightbox() {
+  const video = document.getElementById('lightbox-video');
+  video.pause(); video.src = '';
+  document.getElementById('video-lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeVideoLightbox(); } });
+
 function openLightbox(url) {
   document.getElementById('lightbox-img').src = url;
   document.getElementById('lightbox').classList.add('open');

@@ -11,22 +11,10 @@ miui-lsa-decryptor is a free, open-source, offline tool that decrypts .lsa and .
 
 MIUI Gallery's "Secret Album" feature encrypts every photo and video you move into it, saving them as `.lsa` (photos) and `.lsav` (videos) files. This tool reverses that encryption and gives you back your original JPEGs, PNGs, and MP4s — no account needed, no internet, no cloud.
 
-
-**🌐 Web version (no install):** [miui-lsa-decryptor.vercel.app](https://miui-lsa-decryptor.vercel.app) — runs entirely in your browser, nothing to download.
-
-**⬇ Desktop app:** Download `LSA-Decryptor.exe` from the [latest release](https://github.com/Jay-S9/miui-lsa-decryptor/releases/latest) — no Python needed, just double-click.
+**☕ Support the project:** [ko-fi.com/jays9](https://ko-fi.com/jays9) — if this tool recovered your photos, a coffee is always appreciated.
 
 - **Wide device coverage** — works on Xiaomi, Redmi, and POCO devices running MIUI 12 through HyperOS 2, since all three brands share the same MIUI Gallery Secret Album encryption scheme
   
-
----
-
-## Screenshots
-
-| Web App | Desktop App |
-|---------|-------------|
-| ![Web App](https://raw.githubusercontent.com/Jay-S9/miui-lsa-decryptor/main/assets/screenshot-web.png) | ![Desktop App](https://raw.githubusercontent.com/Jay-S9/miui-lsa-decryptor/main/assets/screenshot-desktop.png) |
-
 ---
 
 ## Features
@@ -34,7 +22,6 @@ MIUI Gallery's "Secret Album" feature encrypts every photo and video you move in
 | | |
 |---|---|
 | **Fully offline** | Decryption happens on your machine. Your files never leave it. |
-| **HyperOS 2.0 support** | Confirmed working on HyperOS 1 and HyperOS 2 alongside all MIUI versions. |
 | **Both file types** | Handles `.lsa` photos and `.lsav` videos from MIUI Secret Album |
 | **Batch processing** | Drop an entire `secretAlbum/` folder and process everything at once |
 | **GUI + CLI + Context menu** | Three ways to use it — pick what suits you |
@@ -158,16 +145,107 @@ The file is saved with the correct extension automatically.
 
 ```
 miui-lsa-decryptor/
+├── .github/workflows/
+│   └── build-exe.yml     ← Auto-builds Windows EXE on every release
+├── assets/               ← Screenshots
+├── install/
+│   └── install.bat       ← Windows context menu installer
 ├── src/
 │   ├── decryptor.py      ← Core AES decryption engine
 │   ├── gui.py            ← Drag-and-drop desktop GUI (CustomTkinter)
 │   └── cli.py            ← Command-line interface
-├── install/
-│   └── install.bat       ← Windows context menu installer
+├── build.spec            ← PyInstaller config
+├── index.html            ← Web version (deploy to Vercel)
+├── robots.txt
+├── sitemap.xml
 ├── requirements.txt
 ├── LICENSE
 └── README.md
 ```
+
+---
+
+## Troubleshooting — File Won't Decrypt
+
+Most decryption failures happen because Xiaomi ships different regional Gallery APK builds (Global, China, EU, India) — and each may use a slightly different signing certificate, meaning a different key.
+
+### Step 1 — Check if the default key is yours
+
+The default key in this tool (`3082046c30820354a003020102020900`) comes from the **Global** MIUI Gallery build. Run a quick check:
+
+```bash
+# The MD5 of the default key is:
+3e751332435bfad27569ca4efed1b602
+
+# Your .lsa filenames contain the MD5 of the key used to encrypt them.
+# If your files are named like:
+3e751332435bfad27569ca4efed1b602.lsa   ← default key, will decrypt fine
+a1b2c3d4e5f6...something_else.lsa      ← different key, follow Step 2
+```
+
+### Step 2 — Extract your own key from your device
+
+```bash
+# 1. Find the Gallery APK path on your phone
+adb shell pm path com.miui.gallery
+
+# 2. Pull it to your PC (path may vary by device)
+adb pull /product/priv-app/MIUIGalleryGlobal/MIUIGalleryGlobal.apk
+# or for China builds:
+adb pull /system/app/MIUIGallery/MIUIGallery.apk
+
+# 3. Print the signing certificate in PEM format
+keytool -printcert -rfc -jarfile MIUIGalleryGlobal.apk
+```
+
+The output looks like this:
+
+```
+-----BEGIN CERTIFICATE-----
+MIIEbDCCA1SgAwIBAgIJAOVSqOy5ARt8MA0GCSqGSIb3DQEBBQUAMIGAMQswCQYD
+VQQGEwJDTjEQMA4GA1UECBMHQmVpamluZzEQMA4GA1UEBxMHQmVpamluZzEPMA0G
+...
+-----END CERTIFICATE-----
+```
+
+### Step 3 — Convert certificate to your key
+
+```python
+import base64
+
+# Paste the full base64 content between BEGIN/END CERTIFICATE here:
+cert_b64 = """
+MIIEbDCCA1SgAwIBAgIJAOVSqOy5ARt8...
+"""
+
+# Decode and take first 16 bytes
+cert_bytes = base64.b64decode(cert_b64.replace("\n", "").strip())
+your_key = cert_bytes[:16].hex()
+print("Your key:", your_key)
+```
+
+### Step 4 — Use your key
+
+Open `src/decryptor.py` and replace the `AES_KEY` line:
+
+```python
+# Replace this line:
+AES_KEY: bytes = bytes.fromhex("3082046c30820354a003020102020900")
+
+# With your extracted key:
+AES_KEY: bytes = bytes.fromhex("your_key_hex_here")
+```
+
+### Common failure scenarios
+
+| Symptom | Likely cause | Fix |
+|---------|-------------|-----|
+| Output is garbled / random bytes | Wrong key (regional build) | Follow Steps 2–4 above |
+| File decrypts but has `.bin` extension | Unusual format (HEIF, 3GP) | Rename to `.heic` or `.3gp` and try |
+| Very small output file | File was already corrupted before encryption | Nothing to fix — data is gone |
+| `FileNotFoundError` | Wrong path or file moved | Check the path and try again |
+
+Still stuck? [Open a Discussion](https://github.com/Jay-S9/miui-lsa-decryptor/discussions) with your device model and MIUI/HyperOS version.
 
 ---
 
@@ -188,6 +266,26 @@ miui-lsa-decryptor/
 **Использование (без установки):** [miui-lsa-decryptor.vercel.app](https://miui-lsa-decryptor.vercel.app)
 
 **Скачать приложение для Windows:** [Последний релиз](https://github.com/Jay-S9/miui-lsa-decryptor/releases/latest)
+
+---
+
+## 快速入门 (Chinese / 中文)
+
+适用于小米、红米和 POCO 用户 — 解密 MIUI/HyperOS 相册保险箱中的 `.lsa` 和 `.lsav` 文件。
+
+**如何找到加密文件：**
+
+通过 USB 连接手机 → 选择**文件传输**模式 → 导航至：
+
+```
+手机内部存储 → MIUI → Gallery → cloud → secretAlbum
+```
+
+文件名为哈希格式，例如 `3e751332435bfad27569ca4efed1b602.lsav` — 这是正常的。
+
+**网页版（无需安装）：** [miui-lsa-decryptor.vercel.app](https://miui-lsa-decryptor.vercel.app)
+
+**Windows 桌面版下载（无需 Python）：** [最新版本](https://github.com/Jay-S9/miui-lsa-decryptor/releases/latest)
 
 ---
 
@@ -223,12 +321,6 @@ MIUI 12 through HyperOS 2.
 Open an issue with the file's size and your MIUI Gallery version — most
 failures are due to a Gallery APK signing-key mismatch across regional
 builds (Global vs. China vs. EU).
-
----
-
-## Contributing
-
-Found a file that won't decrypt? Got a feature idea? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
