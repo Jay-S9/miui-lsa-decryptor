@@ -732,11 +732,122 @@
   }
   .zip-progress.visible { display: block; }
 
+  /* ══ RESPONSIVE ══ */
+  html { -webkit-text-size-adjust: 100%; }
+  @supports (min-height: 100dvh) { body { min-height: 100dvh; } }
+  .mobile-hint {
+    display: none;
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text2);
+    text-align: center;
+  }
+
+  /* Tablet and down */
+  @media (max-width: 720px) {
+    .section { padding: 56px 0; }
+    .section h2 { font-size: 28px; margin-bottom: 28px; }
+  }
+
+  /* Phones */
   @media (max-width: 600px) {
+    .wrap { padding: 0 16px; }
+
+    nav { padding: 14px 0; gap: 12px; }
+    .logo { font-size: 14px; white-space: nowrap; }
     .nav-links { gap: 14px; }
-    .trust-strip { flex-direction: column; gap: 16px; }
+    .nav-links a { white-space: nowrap; }
+    .nav-links a:not(.btn-ko):not([target="_blank"]) { display: none; }   /* in-page anchors; GitHub + Support stay */
+    .btn-ko { padding: 9px 14px; }
+
+    .hero { padding: 32px 0 28px; }
+    .badge { margin-bottom: 20px; }
+    h1 { font-size: clamp(24px, 7.8vw, 40px); margin-bottom: 14px; }   /* Syne ExtraBold is very wide: keep the headline on 2 lines */
+    .hero-sub { font-size: 15px; }
+    .privacy-note { display: flex; align-items: flex-start; justify-content: center; text-align: center; margin-bottom: 10px; }
+    .byline { margin: 0 0 24px !important; line-height: 1.6; overflow-wrap: anywhere; }
+
+    .drop-zone { padding: 32px 20px; border-radius: 14px; }
+    .drop-icon { width: 48px; height: 48px; margin-bottom: 12px; font-size: 20px; }
+    .drop-title { font-size: 17px; }
+    .drop-sub { margin-bottom: 16px; }
+    .btn-browse { padding: 12px 26px; font-size: 15px; min-height: 44px; }
+
+    /* file rows: two lines instead of six items squeezed into one */
+    #file-list { gap: 10px; }
+    .file-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "type name remove" "size status thumb";
+      align-items: center;
+      gap: 6px 10px;
+      padding: 12px;
+      text-align: left;
+    }
+    .file-type { grid-area: type; }
+    .file-name {
+      grid-area: name;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .file-size { grid-area: size; }
+    .file-status { grid-area: status; min-width: 0; overflow-wrap: anywhere; }
+    .preview-thumb, .video-thumb { grid-area: thumb; width: 44px; height: 44px; }
+    .remove-btn { grid-area: remove; font-size: 22px; min-width: 40px; min-height: 40px; }
+
+    .actions { gap: 10px; margin-top: 16px; }
+    .btn-decrypt { padding: 15px 16px; font-size: 16px; min-height: 52px; }
+    .btn-clear { padding: 15px 18px; min-height: 52px; }
+    .btn-zip { padding: 15px 16px; min-height: 52px; }
+
+    .trust-strip { flex-direction: column; gap: 12px; padding: 20px; margin-top: 28px; }
+    .section { padding: 48px 0; }
+    .section h2 { font-size: 26px; margin-bottom: 24px; }
+    .step { padding: 20px; }
+    .path-box { padding: 14px; gap: 10px; align-items: flex-start; }
+    .path-arrow { gap: 6px; }
+    .path-seg { font-size: 11px; padding: 2px 8px; }
+    #find p { overflow-wrap: anywhere; }
+
     .support-box { padding: 28px 20px; }
-    footer { flex-direction: column; text-align: center; }
+    .support-box h2 { font-size: 24px; }
+    .support-btns { flex-direction: column; }
+    .btn-support { width: 100%; justify-content: center; padding: 14px 20px; }
+
+    footer { flex-direction: column; text-align: center; padding: 24px 0; gap: 10px; }
+
+    .toast { left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); text-align: center; }
+    .lightbox img { max-width: 94vw; max-height: 86vh; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 380px) {
+    nav { gap: 8px; }
+    .logo { font-size: 13px; letter-spacing: 0.02em; }
+    .nav-links { gap: 10px; }
+    .nav-links a { font-size: 12px; }
+    .btn-ko { padding: 9px 10px; font-size: 12px; }
+    .drop-zone { padding: 28px 16px; }
+  }
+
+  /* Ultra-narrow (e.g. foldable cover screens): GitHub link also lives in the support box and footer */
+  @media (max-width: 340px) {
+    .nav-links a:not(.btn-ko) { display: none; }
+  }
+
+  /* Touch screens (any width): bigger targets, no sticky hover, phone-specific hint */
+  @media (hover: none) and (pointer: coarse) {
+    .drop-zone:hover { border-color: var(--border2); background: var(--surface); }
+    .btn-browse { border-color: var(--accent); color: var(--accent); min-height: 44px; padding: 12px 28px; font-size: 15px; }
+    .mobile-hint { display: block; }
+    .preview-thumb, .video-thumb { width: 44px; height: 44px; }
+    .remove-btn { min-width: 40px; min-height: 40px; }
   }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -894,7 +1005,7 @@
       Free, offline, works on every Xiaomi, Redmi &amp; POCO device.
     </p>
     <div class="privacy-note">Your files never leave your device — processed entirely in-browser</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3D5566;margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em">Original tool by <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:#3D5566;text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a></div>
+    <div class="byline" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3D5566;margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em">Original tool by <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:#3D5566;text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a></div>
 
     <!-- Drop zone -->
     <div class="drop-zone" id="drop-zone">
@@ -904,6 +1015,7 @@
       <button class="btn-browse" onclick="document.getElementById('file-input').click()">Browse files</button>
       <input type="file" id="file-input" multiple accept=".lsa,.lsav">
     </div>
+    <p class="mobile-hint">📱 On your phone? You can decrypt right here — no PC needed.</p>
 
     <div id="file-list"></div>
 
@@ -1028,8 +1140,8 @@
 
 <!-- Lightbox -->
 <div class="lightbox" id="video-lightbox" onclick="closeVideoLightbox()" style="flex-direction:column;gap:12px">
-  <video id="lightbox-video" controls style="max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,0.6)"></video>
-  <span style="color:#888;font-size:12px;font-family:var(--mono)">click outside to close</span>
+  <video id="lightbox-video" controls onclick="event.stopPropagation()" style="max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,0.6)"></video>
+  <span style="color:#888;font-size:12px;font-family:var(--mono)">tap or click outside to close</span>
 </div>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -1115,12 +1227,15 @@ let fileQueue = [];
 let decryptedBlobs = [];  // Stores {filename, blob} for ZIP download
 
 function addFiles(files) {
+  let added = 0;
   for (const f of files) {
     const ext = f.name.split('.').pop().toLowerCase();
     if (!['lsa','lsav'].includes(ext)) continue;
     if (fileQueue.find(q => q.file.name === f.name && q.file.size === f.size)) continue;
     fileQueue.push({ file: f, ext, status: 'pending', id: Math.random().toString(36).slice(2) });
+    added++;
   }
+  if (!added && files.length) showToast('No new .lsa or .lsav files found in your selection', 'error');
   renderList();
 }
 
@@ -1138,7 +1253,7 @@ function renderList() {
       pending: ['pending', 'READY'],
       working: ['working', 'DECRYPTING…'],
       done:    ['done',    'DONE ✓'],
-      error:   ['error',   item.errorMsg ? item.errorMsg.slice(0,28) : 'ERROR'],
+      error:   ['error',   item.errorMsg || 'ERROR'],
     };
     const [cls, label] = statusMap[item.status];
 
@@ -1359,6 +1474,24 @@ function closeLightbox() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
+
+// ══ Touch-friendly drop zone ══
+(function () {
+  const input  = document.getElementById('file-input');
+  const zoneEl = document.getElementById('drop-zone');
+  // Tap anywhere on the zone to open the picker (the Browse button already does)
+  zoneEl.addEventListener('click', e => {
+    if (e.target === input || e.target.closest('.btn-browse')) return;
+    input.click();
+  });
+  // Touch screens cannot drag & drop, so say what to do instead
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    const title  = zoneEl.querySelector('.drop-title');
+    const browse = zoneEl.querySelector('.btn-browse');
+    if (title)  title.textContent  = 'Tap to choose your .lsa or .lsav files';
+    if (browse) browse.textContent = 'Choose files';
+  }
+})();
 </script>
 </body>
 </html>
