@@ -57,6 +57,16 @@ If you've found a `.lsa` or `.lsav` file that uses a different key:
 
 ---
 
+## Security rules for contributions
+
+- Never put a file name, or any text derived from a file, into HTML. Use `textContent` / `createElement`.
+- No inline `<script>`, `onclick=` or other inline event handlers — the Content-Security-Policy forbids them.
+- Don't add third-party scripts, fonts or network calls. Vendor what you need into `vendor/` and list it in `THIRD_PARTY_NOTICES.md`.
+- Keep GitHub Actions pinned to full commit SHAs and permissions minimal.
+- Run the tests before opening a pull request: `pip install pycryptodome pytest && python -m pytest -q`
+
+---
+
 ## Questions
 
 Open an issue or email [solanki9jay@email.com](mailto:solanki9jay@email.com).

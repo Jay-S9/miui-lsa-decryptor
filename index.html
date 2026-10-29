@@ -42,16 +42,22 @@
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- App scripts are deferred and run in this order: JSZip -> app -> analytics. No inline scripts, so the CSP can forbid them. -->
+<script defer src="vendor/jszip-3.10.1.min.js"></script>
+<script defer src="app.js"></script>
 
-<!-- Vercel Web Analytics -->
-<script>
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-</script>
+<!-- Vercel Web Analytics (the queue stub it needs lives at the top of app.js) -->
 <script defer src="/_vercel/insights/script.js"></script>
 
 <style>
+  /* Fonts are served from this site (no requests to Google) */
+  @font-face { font-family: 'Syne'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/syne-latin-400-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Syne'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/syne-latin-600-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Syne'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/syne-latin-700-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Syne'; font-style: normal; font-weight: 800; font-display: swap; src: url('fonts/syne-latin-800-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2'); }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -745,6 +751,23 @@
     text-align: center;
   }
 
+  /* Language switcher */
+  .lang-select {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    color-scheme: dark;
+  }
+  .lang-select:hover, .lang-select:focus { border-color: var(--accent); color: var(--text); outline: none; }
+  .lang-select option { background: #0E1318; color: #E2EBF0; }
+
   /* Tablet and down */
   @media (max-width: 720px) {
     .section { padding: 56px 0; }
@@ -755,7 +778,7 @@
   @media (max-width: 600px) {
     .wrap { padding: 0 16px; }
 
-    nav { padding: 14px 0; gap: 12px; }
+    nav { padding: 14px 0; gap: 12px; flex-wrap: wrap; }
     .logo { font-size: 14px; white-space: nowrap; }
     .nav-links { gap: 14px; }
     .nav-links a { white-space: nowrap; }
@@ -826,6 +849,11 @@
     .lightbox img { max-width: 94vw; max-height: 86vh; }
   }
 
+  /* Narrow phones: GitHub is also in the support box and footer, make room for the language switcher */
+  @media (max-width: 480px) {
+    .nav-links a[href^="https://github.com"] { display: none; }
+  }
+
   /* Very small phones */
   @media (max-width: 380px) {
     nav { gap: 8px; }
@@ -850,7 +878,6 @@
     .remove-btn { min-width: 40px; min-height: 40px; }
   }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <!-- Language alternates -->
   <link rel="alternate" hreflang="en" href="https://miui-lsa-decryptor.vercel.app/">
@@ -987,10 +1014,15 @@
   <nav>
     <div class="logo">LSA Decryptor</div>
     <div class="nav-links">
-      <a href="#how">How it works</a>
-      <a href="#find">Find files</a>
+      <a href="#how" data-i18n="navHow">How it works</a>
+      <a href="#find" data-i18n="navFind">Find files</a>
       <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank">GitHub</a>
-      <a href="https://ko-fi.com/jays9" target="_blank" class="btn-ko">☕ Support</a>
+      <select id="lang-select" class="lang-select" aria-label="Language / Idioma / Bahasa" title="Language / Idioma / Bahasa">
+        <option value="en">EN</option>
+        <option value="es">ES</option>
+        <option value="id">ID</option>
+      </select>
+      <a href="https://ko-fi.com/jays9" target="_blank" class="btn-ko" data-i18n="navSupport">☕ Support</a>
     </div>
   </nav>
 </div>
@@ -998,35 +1030,35 @@
 <!-- ══ HERO ══ -->
 <div class="wrap">
   <div class="hero">
-    <div class="badge">Free &amp; Open Source</div>
-    <h1>Recover your<br><span>Secret Album</span> files</h1>
-    <p class="hero-sub">
+    <div class="badge" data-i18n="badge">Free &amp; Open Source</div>
+    <h1 data-i18n-html="h1">Recover your<br><span>Secret Album</span> files</h1>
+    <p class="hero-sub" data-i18n="heroSub">
       Convert .lsa to JPG and .lsav to MP4 from Xiaomi MIUI / HyperOS Secret Album.
       Free, offline, works on every Xiaomi, Redmi &amp; POCO device.
     </p>
-    <div class="privacy-note">Your files never leave your device — processed entirely in-browser</div>
-    <div class="byline" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3D5566;margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em">Original tool by <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:#3D5566;text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a></div>
+    <div class="privacy-note" data-i18n="privacy">Your files never leave your device — processed entirely in-browser</div>
+    <div class="byline" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3D5566;margin-top:-36px;margin-bottom:48px;letter-spacing:0.08em"><span data-i18n="bylinePrefix">Original tool by</span> <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" style="color:#3D5566;text-decoration:underline">Jay-S9 · github.com/Jay-S9/miui-lsa-decryptor</a></div>
 
     <!-- Drop zone -->
     <div class="drop-zone" id="drop-zone">
       <div class="drop-icon">⬇</div>
-      <div class="drop-title">Drop .lsa or .lsav files here</div>
-      <div class="drop-sub">Photos (.lsa) and videos (.lsav) both supported</div>
-      <button class="btn-browse" onclick="document.getElementById('file-input').click()">Browse files</button>
+      <div class="drop-title" data-i18n="dropTitle" data-i18n-touch="dropTitleTouch">Drop .lsa or .lsav files here</div>
+      <div class="drop-sub" data-i18n="dropSub">Photos (.lsa) and videos (.lsav) both supported</div>
+      <button class="btn-browse" id="browse-btn" data-i18n="browse" data-i18n-touch="browseTouch">Browse files</button>
       <input type="file" id="file-input" multiple accept=".lsa,.lsav">
     </div>
-    <p class="mobile-hint">📱 On your phone? You can decrypt right here — no PC needed.</p>
+    <p class="mobile-hint" data-i18n="mobileHint">📱 On your phone? You can decrypt right here — no PC needed.</p>
 
     <div id="file-list"></div>
 
     <div class="actions" id="actions" style="display:none">
-      <button class="btn-decrypt" id="decrypt-btn" onclick="startDecryption()">
+      <button class="btn-decrypt" id="decrypt-btn" data-i18n="btnDecrypt">
         Decrypt all files
       </button>
-      <button class="btn-clear" onclick="clearAll()">Clear</button>
+      <button class="btn-clear" id="clear-btn" data-i18n="btnClear">Clear</button>
     </div>
 
-    <button class="btn-zip" id="zip-btn" onclick="downloadZip()">
+    <button class="btn-zip" id="zip-btn">
       ⬇  Download all as ZIP
     </button>
     <div class="zip-progress" id="zip-progress"></div>
@@ -1040,10 +1072,10 @@
 
     <!-- Trust strip -->
     <div class="trust-strip">
-      <div class="trust-item"><div class="trust-dot"></div>100% offline — no uploads</div>
-      <div class="trust-item"><div class="trust-dot"></div>Lossless — original quality</div>
-      <div class="trust-item"><div class="trust-dot"></div>MIUI 12–14 · HyperOS 1 & 2</div>
-      <div class="trust-item"><div class="trust-dot"></div>Open source on GitHub</div>
+      <div class="trust-item"><div class="trust-dot"></div><span data-i18n="trust1">100% offline — no uploads</span></div>
+      <div class="trust-item"><div class="trust-dot"></div><span data-i18n="trust2">Lossless — original quality</span></div>
+      <div class="trust-item"><div class="trust-dot"></div><span data-i18n="trust3">MIUI 12–14 · HyperOS 1 & 2</span></div>
+      <div class="trust-item"><div class="trust-dot"></div><span data-i18n="trust4">Open source on GitHub</span></div>
     </div>
   </div>
 </div>
@@ -1051,28 +1083,28 @@
 <!-- ══ HOW IT WORKS ══ -->
 <div class="wrap">
   <div class="section" id="how">
-    <div class="section-label">// How it works</div>
-    <h2>Simple. Private. Fast.</h2>
+    <div class="section-label" data-i18n="howLabel">// How it works</div>
+    <h2 data-i18n="howTitle">Simple. Private. Fast.</h2>
     <div class="steps">
       <div class="step">
         <div class="step-num">01 —</div>
-        <h3>Connect your phone</h3>
-        <p>USB cable → File Transfer mode → copy the secretAlbum folder to your PC</p>
+        <h3 data-i18n="step1Title">Connect your phone</h3>
+        <p data-i18n="step1Text">USB cable → File Transfer mode → copy the secretAlbum folder to your PC</p>
       </div>
       <div class="step">
         <div class="step-num">02 —</div>
-        <h3>Drop the files</h3>
-        <p>Drag .lsa photos or .lsav videos directly into the zone above</p>
+        <h3 data-i18n="step2Title">Drop the files</h3>
+        <p data-i18n="step2Text" data-i18n-touch="step2TextTouch">Drag .lsa photos or .lsav videos directly into the zone above</p>
       </div>
       <div class="step">
         <div class="step-num">03 —</div>
-        <h3>Click decrypt</h3>
-        <p>AES-128-CTR decryption runs locally in your browser in seconds</p>
+        <h3 data-i18n="step3Title">Click decrypt</h3>
+        <p data-i18n="step3Text">AES-128-CTR decryption runs locally in your browser in seconds</p>
       </div>
       <div class="step">
         <div class="step-num">04 —</div>
-        <h3>Download &amp; done</h3>
-        <p>Your JPEG, PNG, or MP4 files download automatically. Original quality.</p>
+        <h3 data-i18n="step4Title">Download &amp; done</h3>
+        <p data-i18n="step4Text">Your JPEG, PNG, or MP4 files download automatically. Original quality.</p>
       </div>
     </div>
   </div>
@@ -1081,15 +1113,15 @@
 <!-- ══ FIND YOUR FILES ══ -->
 <div class="wrap">
   <div class="section" id="find">
-    <div class="section-label">// Finding your files</div>
-    <h2>Where are the .lsa files?</h2>
-    <p style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">
+    <div class="section-label" data-i18n="findLabel">// Finding your files</div>
+    <h2 data-i18n="findTitle">Where are the .lsa files?</h2>
+    <p data-i18n-html="findP1" style="color:var(--text2);font-size:14px;margin-bottom:20px;line-height:1.7">
       Connect your Xiaomi phone via USB, enable <strong style="color:var(--text)">File Transfer</strong> mode,
       then navigate to this path in File Explorer:
     </p>
     <div class="path-box">
       <div class="path-arrow">
-        <span class="path-seg">Internal Storage</span>
+        <span class="path-seg" data-i18n="pathInternal">Internal Storage</span>
         <span class="path-sep">›</span>
         <span class="path-seg">MIUI</span>
         <span class="path-sep">›</span>
@@ -1100,7 +1132,7 @@
         <span class="path-seg" style="color:var(--accent)">secretAlbum</span>
       </div>
     </div>
-    <p style="color:var(--text2);font-size:13px;font-family:var(--mono);line-height:1.7">
+    <p data-i18n-html="findP2" style="color:var(--text2);font-size:13px;font-family:var(--mono);line-height:1.7">
       Files will have hashed names like <span style="color:var(--accent)">3e751332435bfad27569ca4efed1b602.lsav</span> — that's normal. These are your encrypted photos (.lsa → JPG/PNG) and videos (.lsav → MP4).
       Copy the entire secretAlbum folder to your PC before uploading here.
     </p>
@@ -1111,15 +1143,15 @@
 <div class="wrap">
   <div class="section">
     <div class="support-box">
-      <h2>This tool is free — forever</h2>
-      <p>
+      <h2 data-i18n="supportTitle">This tool is free — forever</h2>
+      <p data-i18n="supportText">
         Built by one person to solve a real problem. If it helped you recover
         photos or videos you thought were lost, consider supporting the project.
       </p>
       <div class="support-btns">
-        <a href="https://ko-fi.com/jays9" target="_blank" class="btn-support btn-kofi">☕ Buy me a coffee</a>
-        <a href="https://github.com/Jay-S9/miui-lsa-decryptor/zipball/main" target="_blank" class="btn-support btn-Download"> Download app from here</a>
-        <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" class="btn-support btn-github">★ Star on GitHub</a>
+        <a href="https://ko-fi.com/jays9" target="_blank" class="btn-support btn-kofi" data-i18n="btnCoffee">☕ Buy me a coffee</a>
+        <a href="https://github.com/Jay-S9/miui-lsa-decryptor/zipball/main" target="_blank" class="btn-support btn-Download" data-i18n="btnDownload"> Download app from here</a>
+        <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank" class="btn-support btn-github" data-i18n="btnStar">★ Star on GitHub</a>
       </div>
     </div>
   </div>
@@ -1128,370 +1160,28 @@
 <!-- ══ FOOTER ══ -->
 <div class="wrap">
   <footer>
-    <div>LSA Decryptor — Built by <a href="https://github.com/Jay-S9" target="_blank" style="color:#3D5566;text-decoration:none">Jay-S9</a> — MIT License</div>
+    <div data-i18n-html="footBuilt">LSA Decryptor — Built by <a href="https://github.com/Jay-S9" target="_blank" style="color:#3D5566;text-decoration:none">Jay-S9</a> — MIT License</div>
     <div style="display:flex;gap:20px">
       <a href="https://github.com/Jay-S9/miui-lsa-decryptor" target="_blank">GitHub</a>
-      <a href="#how">How it works</a>
-      <a href="mailto:solanki9jay@email.com">Contact</a>
+      <a href="#how" data-i18n="navHow">How it works</a>
+      <a href="mailto:solanki9jay@email.com" data-i18n="footContact">Contact</a>
     </div>
   </footer>
 </div>
 
 
 <!-- Lightbox -->
-<div class="lightbox" id="video-lightbox" onclick="closeVideoLightbox()" style="flex-direction:column;gap:12px">
-  <video id="lightbox-video" controls onclick="event.stopPropagation()" style="max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,0.6)"></video>
-  <span style="color:#888;font-size:12px;font-family:var(--mono)">tap or click outside to close</span>
+<div class="lightbox" id="video-lightbox" style="flex-direction:column;gap:12px">
+  <video id="lightbox-video" controls style="max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 32px 80px rgba(0,0,0,0.6)"></video>
+  <span data-i18n="lightboxClose" style="color:#888;font-size:12px;font-family:var(--mono)">tap or click outside to close</span>
 </div>
 
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+<div class="lightbox" id="lightbox">
   <img id="lightbox-img" src="" alt="Preview">
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script>
-// ══════════════════════════════════════════════════════
-// AES-128-CTR Decryption — Web Crypto API
-// Same key/IV as the Python desktop tool
-// ══════════════════════════════════════════════════════
-
-const AES_KEY_HEX = '3082046c30820354a003020102020900';
-const AES_IV_BYTES = [17,19,33,35,49,51,65,67,81,83,97,102,103,104,113,114];
-
-// Convert IV bytes to a BigInt counter (matches Python implementation)
-function ivToCounter(ivBytes) {
-  // Split: first 8 bytes = nonce, last 8 bytes = initial counter value
-  // Web Crypto CTR uses a 16-byte counter block directly
-  return new Uint8Array(ivBytes.map(b => b & 0xFF));
-}
-
-async function getKey() {
-  const keyBytes = new Uint8Array(AES_KEY_HEX.match(/.{2}/g).map(h => parseInt(h,16)));
-  return crypto.subtle.importKey('raw', keyBytes, { name: 'AES-CTR' }, false, ['decrypt']);
-}
-
-async function decryptBuffer(buffer, isVideo) {
-  const key = await getKey();
-  const iv  = ivToCounter(AES_IV_BYTES);
-  const HEADER = 1024;
-
-  if (isVideo && buffer.byteLength > HEADER) {
-    // .lsav: only decrypt first 1024 bytes, rest is plain
-    const header    = buffer.slice(0, HEADER);
-    const body      = buffer.slice(HEADER);
-    const decHeader = await crypto.subtle.decrypt(
-      { name: 'AES-CTR', counter: iv, length: 64 }, key, header
-    );
-    // Merge decrypted header + plain body
-    const result = new Uint8Array(decHeader.byteLength + body.byteLength);
-    result.set(new Uint8Array(decHeader), 0);
-    result.set(new Uint8Array(body), decHeader.byteLength);
-    return result.buffer;
-  } else {
-    // .lsa: decrypt entire file
-    return crypto.subtle.decrypt(
-      { name: 'AES-CTR', counter: iv, length: 64 }, key, buffer
-    );
-  }
-}
-
-function detectExtension(bytes) {
-  const b = new Uint8Array(bytes);
-  if (b[0]===0xFF && b[1]===0xD8 && b[2]===0xFF)           return '.jpg';
-  if (b[0]===0x89 && b[1]===0x50 && b[2]===0x4E && b[3]===0x47) return '.png';
-  if (b[4]===0x66 && b[5]===0x74 && b[6]===0x79 && b[7]===0x70) return '.mp4'; // ftyp
-  if (b[0]===0x1A && b[1]===0x45 && b[2]===0xDF && b[3]===0xA3) return '.mkv';
-  if (b[0]===0x47 && b[1]===0x49 && b[2]===0x46)           return '.gif';
-  return '.bin';
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/1024/1024).toFixed(1) + ' MB';
-}
-
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a   = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-}
-
-// ══ File queue ══
-let fileQueue = [];
-let decryptedBlobs = [];  // Stores {filename, blob} for ZIP download
-
-function addFiles(files) {
-  let added = 0;
-  for (const f of files) {
-    const ext = f.name.split('.').pop().toLowerCase();
-    if (!['lsa','lsav'].includes(ext)) continue;
-    if (fileQueue.find(q => q.file.name === f.name && q.file.size === f.size)) continue;
-    fileQueue.push({ file: f, ext, status: 'pending', id: Math.random().toString(36).slice(2) });
-    added++;
-  }
-  if (!added && files.length) showToast('No new .lsa or .lsav files found in your selection', 'error');
-  renderList();
-}
-
-function renderList() {
-  const list = document.getElementById('file-list');
-  const actions = document.getElementById('actions');
-  list.innerHTML = '';
-
-  fileQueue.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'file-item';
-    div.id = 'item-' + item.id;
-
-    const statusMap = {
-      pending: ['pending', 'READY'],
-      working: ['working', 'DECRYPTING…'],
-      done:    ['done',    'DONE ✓'],
-      error:   ['error',   item.errorMsg || 'ERROR'],
-    };
-    const [cls, label] = statusMap[item.status];
-
-    const thumbHtml = item.previewUrl
-      ? item.previewType === 'video'
-        ? `<span class="preview-thumb video-thumb" title="Click to preview" onclick="openVideoLightbox('${item.previewUrl}')">▶</span>`
-        : `<img class="preview-thumb" src="${item.previewUrl}" title="Click to preview" onclick="openLightbox('${item.previewUrl}')">`
-      : '';
-
-    div.innerHTML = `
-      <span class="file-type ${item.ext}">.${item.ext}</span>
-      <span class="file-name">${item.file.name}</span>
-      <span class="file-size">${formatSize(item.file.size)}</span>
-      ${thumbHtml}
-      <span class="file-status ${cls}">${label}</span>
-      ${item.status === 'pending' ? `<button class="remove-btn" onclick="removeFile('${item.id}')">×</button>` : ''}
-    `;
-    list.appendChild(div);
-  });
-
-  actions.style.display = fileQueue.length ? 'flex' : 'none';
-  document.getElementById('decrypt-btn').disabled = !fileQueue.some(f => f.status === 'pending');
-}
-
-function removeFile(id) {
-  fileQueue = fileQueue.filter(f => f.id !== id);
-  renderList();
-}
-
-function clearAll() {
-  fileQueue = [];
-  decryptedBlobs = [];
-  document.getElementById('zip-btn').classList.remove('visible');
-  document.getElementById('zip-progress').classList.remove('visible');
-  renderList();
-  document.getElementById('progress-wrap').classList.remove('visible');
-}
-
-function setItemStatus(id, status) {
-  const item = fileQueue.find(f => f.id === id);
-  if (item) { item.status = status; renderList(); }
-}
-
-// ══ Decryption ══
-async function startDecryption() {
-  const pending = fileQueue.filter(f => f.status === 'pending');
-  if (!pending.length) return;
-
-  document.getElementById('decrypt-btn').disabled = true;
-  document.getElementById('progress-wrap').classList.add('visible');
-
-  let done = 0;
-  for (const item of pending) {
-    setItemStatus(item.id, 'working');
-    updateProgress(done, pending.length, item.file.name);
-
-    try {
-      const buf       = await item.file.arrayBuffer();
-
-      // Minimum size check
-      if (buf.byteLength < 16) {
-        throw new Error('File too small — not a valid .lsa/.lsav file');
-      }
-
-      const isVideo   = item.ext === 'lsav';
-      const decrypted = await decryptBuffer(buf, isVideo);
-      const ext       = detectExtension(decrypted);
-      const stem      = item.file.name.replace(/\.(lsa|lsav)$/i, '');
-      const mimeMap   = { '.jpg':'image/jpeg','.png':'image/png','.mp4':'video/mp4','.mkv':'video/x-matroska','.gif':'image/gif','.bin':'application/octet-stream' };
-      const mimeType  = mimeMap[ext] || 'application/octet-stream';
-      const blob      = new Blob([decrypted], { type: mimeType });
-
-      // Store preview URL for images and videos
-      if (['.jpg', '.png', '.gif'].includes(ext)) {
-        item.previewUrl = URL.createObjectURL(blob);
-        item.previewType = 'image';
-      } else if (ext === '.mp4' || ext === '.mkv') {
-        item.previewUrl = URL.createObjectURL(blob);
-        item.previewType = 'video';
-      }
-
-      // Store for ZIP download
-      decryptedBlobs.push({ filename: stem + '_decrypted' + ext, blob });
-
-      downloadBlob(blob, stem + '_decrypted' + ext);
-      setItemStatus(item.id, 'done');
-    } catch (e) {
-      // Human-readable error messages
-      let msg = e.message || 'Unknown error';
-      if (msg.includes('too small'))        msg = 'File too small — not a valid .lsa/.lsav file';
-      else if (msg.includes('key'))         msg = 'Key error — file may use a different Gallery version';
-      else if (msg.includes('decrypt'))     msg = 'Decryption failed — try the desktop app instead';
-      else if (msg.includes('buffer'))      msg = 'File read error — file may be corrupted';
-      item.errorMsg = msg;
-      setItemStatus(item.id, 'error');
-      console.error(item.file.name, e);
-    }
-    done++;
-  }
-
-  updateProgress(pending.length, pending.length, '');
-  document.getElementById('progress-label').textContent = `Done — ${done} file${done!==1?'s':''} decrypted`;
-  showToast(`${done} file${done!==1?'s':''} decrypted successfully`, 'success');
-
-  // Show ZIP button if more than one file was decrypted
-  if (decryptedBlobs.length > 1) {
-    const zipBtn = document.getElementById('zip-btn');
-    zipBtn.textContent = `⬇  Download all ${decryptedBlobs.length} files as ZIP`;
-    zipBtn.classList.add('visible');
-  }
-}
-
-function updateProgress(current, total, filename) {
-  const pct = total ? Math.round((current / total) * 100) : 0;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-label').textContent =
-    filename ? `Processing: ${filename}` : `${pct}%`;
-}
-
-// ══ Drag & drop ══
-const zone = document.getElementById('drop-zone');
-
-zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
-zone.addEventListener('dragleave', e => { zone.classList.remove('drag-over'); });
-zone.addEventListener('drop', e => {
-  e.preventDefault();
-  zone.classList.remove('drag-over');
-  addFiles([...e.dataTransfer.files]);
-});
-
-document.getElementById('file-input').addEventListener('change', e => {
-  addFiles([...e.target.files]);
-  e.target.value = '';
-});
-
-// ══ Toast ══
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3500);
-}
-
-
-// ══ ZIP Download ══
-async function downloadZip() {
-  if (!decryptedBlobs.length) return;
-
-  const btn      = document.getElementById('zip-btn');
-  const progress = document.getElementById('zip-progress');
-
-  btn.textContent = '⏳  Packing ZIP…';
-  btn.style.pointerEvents = 'none';
-  progress.textContent = `Compressing ${decryptedBlobs.length} files…`;
-  progress.classList.add('visible');
-
-  try {
-    const zip = new JSZip();
-    const folder = zip.folder('lsa_decrypted');
-
-    for (const { filename, blob } of decryptedBlobs) {
-      const buf = await blob.arrayBuffer();
-      folder.file(filename, buf);
-    }
-
-    progress.textContent = 'Generating ZIP file…';
-
-    const zipBlob = await zip.generateAsync(
-      { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
-      (metadata) => {
-        progress.textContent = `Compressing… ${metadata.percent.toFixed(0)}%`;
-      }
-    );
-
-    // Download the ZIP
-    const url = URL.createObjectURL(zipBlob);
-    const a   = document.createElement('a');
-    a.href     = url;
-    a.download = `lsa_decrypted_${decryptedBlobs.length}_files.zip`;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-
-    btn.textContent = `✓  ZIP downloaded (${decryptedBlobs.length} files)`;
-    btn.style.color = 'var(--success)';
-    btn.style.borderColor = 'var(--success)';
-    progress.classList.remove('visible');
-
-  } catch (err) {
-    btn.textContent = '⬇  Download all as ZIP';
-    btn.style.pointerEvents = 'auto';
-    progress.textContent = 'ZIP failed — try downloading files individually';
-    console.error('ZIP error:', err);
-  }
-}
-
-// ══ Lightbox ══
-function openVideoLightbox(url) {
-  const video = document.getElementById('lightbox-video');
-  video.src = url;
-  document.getElementById('video-lightbox').classList.add('open');
-  video.play().catch(() => {});
-}
-function closeVideoLightbox() {
-  const video = document.getElementById('lightbox-video');
-  video.pause(); video.src = '';
-  document.getElementById('video-lightbox').classList.remove('open');
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeVideoLightbox(); } });
-
-function openLightbox(url) {
-  document.getElementById('lightbox-img').src = url;
-  document.getElementById('lightbox').classList.add('open');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.getElementById('lightbox-img').src = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-
-
-// ══ Touch-friendly drop zone ══
-(function () {
-  const input  = document.getElementById('file-input');
-  const zoneEl = document.getElementById('drop-zone');
-  // Tap anywhere on the zone to open the picker (the Browse button already does)
-  zoneEl.addEventListener('click', e => {
-    if (e.target === input || e.target.closest('.btn-browse')) return;
-    input.click();
-  });
-  // Touch screens cannot drag & drop, so say what to do instead
-  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
-    const title  = zoneEl.querySelector('.drop-title');
-    const browse = zoneEl.querySelector('.btn-browse');
-    if (title)  title.textContent  = 'Tap to choose your .lsa or .lsav files';
-    if (browse) browse.textContent = 'Choose files';
-  }
-})();
-</script>
 </body>
 </html>

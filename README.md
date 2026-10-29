@@ -161,19 +161,26 @@ The file is saved with the correct extension automatically.
 ```
 miui-lsa-decryptor/
 ├── .github/workflows/
-│   └── build-exe.yml     ← Auto-builds Windows EXE on every release
+│   ├── build-exe.yml     ← Builds the Windows EXE + SHA-256 checksum on every release
+│   └── ci.yml            ← Runs the tests on every push and pull request
 ├── assets/               ← Screenshots
+├── fonts/                ← Self-hosted fonts (Syne, JetBrains Mono)
 ├── install/
 │   └── install.bat       ← Windows context menu installer
 ├── src/
-│   ├── decryptor.py      ← Core AES decryption engine
+│   ├── decryptor.py      ← Core AES decryption engine (chunked, memory-safe)
 │   ├── gui.py            ← Drag-and-drop desktop GUI (CustomTkinter)
 │   └── cli.py            ← Command-line interface
+├── tests/                ← Decryption engine tests (pytest)
+├── vendor/               ← Self-hosted JSZip
+├── app.js                ← Web version logic (makes no network calls)
 ├── build.spec            ← PyInstaller config
 ├── index.html            ← Web version (deployed to Vercel)
 ├── robots.txt
 ├── sitemap.xml
 ├── requirements.txt
+├── SECURITY.md
+├── THIRD_PARTY_NOTICES.md
 ├── LICENSE
 └── README.md
 ```
@@ -294,6 +301,17 @@ AES_KEY: bytes = bytes.fromhex("your_key_hex_here")
 | `FileNotFoundError` | Wrong path | Check the path and try again |
 
 Still stuck? [Open a Discussion](https://github.com/Jay-S9/miui-lsa-decryptor/discussions) with your device model and MIUI/HyperOS version.
+
+---
+
+## Security & privacy
+
+- **Your files stay on your device.** The web version decrypts with the Web Crypto API inside your browser tab. `app.js` contains no network calls, and the site's Content-Security-Policy only lets the page connect to this site. To check it yourself: open your browser's developer tools, go to the **Network** tab, decrypt a file, and watch — nothing carrying your data is sent.
+- **No third-party scripts or fonts.** JSZip and the fonts are served from this site. The hosted site uses Vercel Web Analytics for anonymous page-view counts; the app never hands your files to it.
+- **Crafted file names can't run code.** Names are always shown as plain text, and the policy blocks inline scripts.
+- **Big files.** The web version queues up to 500 files and decrypts photos up to 150 MB (videos are not limited — only their small header is read). The desktop app and CLI process files in small chunks, so memory use stays flat whatever the size.
+- **Verify the Windows download.** Releases built by the current workflow include `LSA-Decryptor.exe.sha256`. In PowerShell: `Get-FileHash .\LSA-Decryptor.exe -Algorithm SHA256` and compare with that file.
+- **Found a vulnerability?** See [SECURITY.md](SECURITY.md).
 
 ---
 
