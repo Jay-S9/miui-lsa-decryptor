@@ -19,10 +19,21 @@ Video files (.lsav): Only the first 1024 bytes (the media header) are
 After decryption we inspect the first few bytes ("magic bytes") to
 determine the original file format (JPEG, PNG, or MP4) and write the
 output with the correct extension.
+
+Robustness guarantees (this module is used on untrusted, possibly huge files):
+  - Files are processed in fixed-size chunks, so memory use stays small
+    no matter how large the input is (a 4 GB video needs the same RAM as a 4 KB one).
+  - Output is written to a temporary ".part" file and only renamed into place
+    when decryption has fully succeeded — a failure never leaves a truncated
+    or half-written file behind.
+  - An existing file is never overwritten: if "photo_decrypted.jpg" exists, the
+    next output is "photo_decrypted (1).jpg", and so on.
+  - Output names are built from the input's base name only and are always
+    created inside the chosen output directory.
 """
 
 import os
-import struct
+import tempfile
 from pathlib import Path
 from Crypto.Cipher import AES
 
@@ -44,6 +55,12 @@ AES_KEY: bytes = bytes.fromhex("3082046c30820354a003020102020900")
 
 # Only the first 1024 bytes of a video file are encrypted.
 LSAV_HEADER_SIZE: int = 1024
+
+# Anything smaller than one AES block cannot be a real encrypted media file.
+MIN_FILE_SIZE: int = 16
+
+# Read/decrypt this many bytes at a time (bounded memory use).
+CHUNK_SIZE: int = 1024 * 1024
 
 
 # ---------------------------------------------------------------------------
@@ -95,12 +112,73 @@ def _build_aes_cipher() -> AES:
     )
 
 
+def _output_stem(input_path: Path) -> str:
+    """Base name for the output: the original name with the key-hash part removed."""
+    stem = Path(input_path.stem.split(".")[0]).name      # .name guarantees no path components
+    return stem or "file"
+
+
+def _unique_path(output_dir: Path, stem: str, ext: str) -> Path:
+    """First free '<stem>_decrypted<ext>', '<stem>_decrypted (1)<ext>', ... — never overwrites."""
+    candidate = output_dir / f"{stem}_decrypted{ext}"
+    n = 1
+    while candidate.exists():
+        candidate = output_dir / f"{stem}_decrypted ({n}){ext}"
+        n += 1
+    return candidate
+
+
+def _decrypt_stream(input_path: Path, output_dir: Path, encrypted_prefix: int | None) -> Path:
+    """
+    Decrypt `input_path` chunk by chunk into `output_dir`.
+
+    Args:
+        encrypted_prefix: number of leading bytes that are encrypted, or None if the
+                          whole file is (photos). Bytes after the prefix are copied as-is.
+    """
+    size = input_path.stat().st_size
+    if size < MIN_FILE_SIZE:
+        raise ValueError("File too small — not a valid .lsa/.lsav file")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    cipher = _build_aes_cipher()
+    remaining = encrypted_prefix                      # None = everything is encrypted
+    ext = None
+
+    tmp = tempfile.NamedTemporaryFile(dir=output_dir, prefix=".lsa_", suffix=".part", delete=False)
+    tmp_path = Path(tmp.name)
+    try:
+        with open(input_path, "rb") as src, tmp:
+            while True:
+                chunk = src.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                if remaining is None:
+                    out = cipher.decrypt(chunk)
+                else:
+                    n = min(remaining, len(chunk))
+                    out = (cipher.decrypt(chunk[:n]) + chunk[n:]) if n else chunk
+                    remaining -= n
+                if ext is None:                       # first chunk tells us the real format
+                    ext = _detect_extension(out)
+                tmp.write(out)
+        final = _unique_path(output_dir, _output_stem(input_path), ext or ".bin")
+        os.replace(tmp_path, final)                   # atomic: the file appears complete or not at all
+        return final
+    except BaseException:
+        try:
+            tmp_path.unlink()
+        except OSError:
+            pass
+        raise
+
+
 def decrypt_lsa(input_path: Path, output_dir: Path) -> Path:
     """
     Decrypt a .lsa photo file.
 
-    The entire file is AES-encrypted. We decrypt it in one pass,
-    detect the image format from the magic bytes, and save it.
+    The entire file is AES-encrypted. It is decrypted in chunks, the image
+    format is detected from the magic bytes, and the result is saved.
 
     Args:
         input_path:  Path to the .lsa encrypted file.
@@ -109,16 +187,7 @@ def decrypt_lsa(input_path: Path, output_dir: Path) -> Path:
     Returns:
         Path to the decrypted output file.
     """
-    encrypted_data = input_path.read_bytes()
-    cipher = _build_aes_cipher()
-    decrypted_data = cipher.decrypt(encrypted_data)
-
-    ext = _detect_extension(decrypted_data)
-    stem = input_path.stem.split(".")[0]           # strip md5 hash from filename
-    output_path = output_dir / f"{stem}_decrypted{ext}"
-
-    output_path.write_bytes(decrypted_data)
-    return output_path
+    return _decrypt_stream(input_path, output_dir, encrypted_prefix=None)
 
 
 def decrypt_lsav(input_path: Path, output_dir: Path) -> Path:
@@ -127,7 +196,7 @@ def decrypt_lsav(input_path: Path, output_dir: Path) -> Path:
 
     Only the first 1024 bytes (the container header) are encrypted.
     The rest of the video payload is stored in plaintext. We decrypt
-    only the header and stitch it back onto the untouched body.
+    only the header and copy the untouched body after it, in chunks.
 
     Args:
         input_path:  Path to the .lsav encrypted file.
@@ -136,26 +205,7 @@ def decrypt_lsav(input_path: Path, output_dir: Path) -> Path:
     Returns:
         Path to the decrypted output file.
     """
-    raw = input_path.read_bytes()
-
-    encrypted_header = raw[:LSAV_HEADER_SIZE]
-    video_body       = raw[LSAV_HEADER_SIZE:]       # already plaintext
-
-    cipher = _build_aes_cipher()
-    decrypted_header = cipher.decrypt(encrypted_header)
-
-    # Pad header back to 1024 bytes if the file was smaller (edge case)
-    if len(raw) < LSAV_HEADER_SIZE:
-        decrypted_data = decrypted_header
-    else:
-        decrypted_data = decrypted_header + video_body
-
-    ext = _detect_extension(decrypted_data)
-    stem = input_path.stem.split(".")[0]
-    output_path = output_dir / f"{stem}_decrypted{ext}"
-
-    output_path.write_bytes(decrypted_data)
-    return output_path
+    return _decrypt_stream(input_path, output_dir, encrypted_prefix=LSAV_HEADER_SIZE)
 
 
 def decrypt_file(input_path: Path, output_dir: Path) -> Path:
@@ -170,10 +220,11 @@ def decrypt_file(input_path: Path, output_dir: Path) -> Path:
         Path to the decrypted output file.
 
     Raises:
-        ValueError: If the file extension is not .lsa or .lsav.
-        FileNotFoundError: If the input file does not exist.
+        ValueError: If the file extension is not .lsa or .lsav, or the file is too small.
+        FileNotFoundError: If the input does not exist or is not a regular file.
     """
-    if not input_path.exists():
+    input_path, output_dir = Path(input_path), Path(output_dir)
+    if not input_path.is_file():
         raise FileNotFoundError(f"File not found: {input_path}")
 
     suffix = input_path.suffix.lower()
@@ -199,10 +250,10 @@ def decrypt_folder(folder_path: Path, output_dir: Path,
     Returns:
         List of result dicts: {"input", "output", "success", "error"}
     """
-    files = [
+    files = sorted(
         f for f in folder_path.iterdir()
         if f.suffix.lower() in (".lsa", ".lsav") and f.is_file()
-    ]
+    )
 
     results = []
     for i, file in enumerate(files):
