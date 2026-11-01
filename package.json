@@ -1,0 +1,11 @@
+{
+  "name": "miui-lsa-decryptor",
+  "version": "1.0.0",
+  "description": "Free online tool to decrypt .lsa photos and .lsav videos from Xiaomi MIUI / HyperOS Secret Album",
+  "scripts": {},
+  "author": "Jay Solanki",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
