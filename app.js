@@ -9,6 +9,9 @@
 // Queue stub required by Vercel Web Analytics (kept here so the page has no inline scripts)
 window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 
+// Queue stub required by Vercel Speed Insights
+window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+
 // ══════════════════════════════════════════════════════
 // AES-128-CTR Decryption — Web Crypto API
 // Same key/IV as the Python desktop tool
